@@ -4,9 +4,9 @@ import { FAILED_TO_CREATE_BUFFER } from '../errors';
 import { PrimitiveParams } from '../types';
 
 export class Rectangle {
-  localMatrix: mat3;
-  worldMatrix: mat3;
-  color: vec4;
+  public localMatrix: mat3;
+  public worldMatrix: mat3;
+  public color: vec4;
 
   gl: WebGLRenderingContext;
   #program: WebGLProgram;
