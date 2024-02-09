@@ -7,8 +7,9 @@ export class Rectangle {
   y = 0;
   width = 0;
   height = 0;
-  color = new Float32Array([1.0, 0.0, 0.0, 1.0]);
+  color = new Float32Array([ 1.0, 0.0, 0.0, 1.0 ]);
 
+  gl: WebGLRenderingContext;
   #program: WebGLProgram;
   #buffer!: WebGLBuffer | null;
   #vertexShaderSource = `#version 300 es
@@ -30,17 +31,18 @@ export class Rectangle {
     }
 `;
 
-  constructor(gl: WebGLRenderingContext, x?: number, y?: number, v?: vec2) {
-    if (x && y && v) {
-      this.x = x;
-      this.y = y;
-      this.width = v[ 0 ];
-      this.height = v[ 1 ]
+  constructor(gl: WebGLRenderingContext, { v1, v2 }: { v1: [ number, number ], v2: [ number, number ] }) {
+    this.gl = gl;
+    if (v1 && v2) {
+      this.x = v1[ 0 ];
+      this.y = v1[ 1 ];
+      this.width = v2[ 0 ];
+      this.height = v2[ 1 ];
     }
-    const vertexShader = compileShader(gl, this.#vertexShaderSource, gl.VERTEX_SHADER);
-    const fragmentShader = compileShader(gl, this.#fragmentShaderSource, gl.FRAGMENT_SHADER);
-    this.#program = createProgram(gl, vertexShader, fragmentShader);
-    this.initBuffer(gl);
+    const vertexShader = compileShader(this.gl, this.#vertexShaderSource, this.gl.VERTEX_SHADER);
+    const fragmentShader = compileShader(this.gl, this.#fragmentShaderSource, this.gl.FRAGMENT_SHADER);
+    this.#program = createProgram(this.gl, vertexShader, fragmentShader);
+    this.initBuffer(this.gl);
   }
 
   private initBuffer(gl: WebGLRenderingContext): void {
@@ -50,7 +52,7 @@ export class Rectangle {
       0.0, this.height,
       0.0, this.height,
       this.width, 0.0,
-      this.width, this.height,
+      this.width, this.height
     ]);
 
     this.#buffer = gl.createBuffer();
@@ -65,28 +67,28 @@ export class Rectangle {
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
   }
 
-  draw(gl: WebGLRenderingContext): void {
-    gl.useProgram(this.#program);
+  draw(): void {
+    this.gl.useProgram(this.#program);
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.#buffer);
+    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.#buffer);
 
-    const colorUniformLocation = gl.getUniformLocation(this.#program, 'u_color');
-    gl.uniform4fv(colorUniformLocation, this.color);
+    const colorUniformLocation = this.gl.getUniformLocation(this.#program, 'u_color');
+    this.gl.uniform4fv(colorUniformLocation, this.color);
 
-    const positionAttributeLocation = gl.getAttribLocation(this.#program, 'a_position');
-    gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(positionAttributeLocation);
+    const positionAttributeLocation = this.gl.getAttribLocation(this.#program, 'a_position');
+    this.gl.vertexAttribPointer(positionAttributeLocation, 2, this.gl.FLOAT, false, 0, 0);
+    this.gl.enableVertexAttribArray(positionAttributeLocation);
 
-    const matrixUniformLocation = gl.getUniformLocation(this.#program, 'u_matrix');
+    const matrixUniformLocation = this.gl.getUniformLocation(this.#program, 'u_matrix');
     const matrix = new Float32Array([
       this.width, 0, 0,
       0, this.height, 0,
-      this.x, this.y, 1,
+      this.x, this.y, 1
     ]);
-    gl.uniformMatrix3fv(matrixUniformLocation, false, matrix);
+    this.gl.uniformMatrix3fv(matrixUniformLocation, false, matrix);
 
-    gl.drawArrays(gl.TRIANGLES, 0, 6);
+    this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, null);
   }
 }
