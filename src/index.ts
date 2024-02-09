@@ -1,35 +1,14 @@
 import { initGL } from './gl';
-import { BaseScene, sceneDiscriminantType } from './types';
 import { Rectangle } from './primitives/rectangle';
-
-const sceneA = {
-  type: sceneDiscriminantType.world,
-  properties: {
-    scale: 1
-  },
-  children: [
-    {
-      type: sceneDiscriminantType.rectangle,
-      properties: {
-        v1: [ 0, 0 ],
-        v2: [ 40, 40 ]
-      }
-    },
-    {
-      type: sceneDiscriminantType.rectangle,
-      properties: {
-        v1: [ 40, 40 ],
-        v2: [ 80, 80 ]
-      }
-    }
-  ]
-} as const satisfies BaseScene;
+import { mat3, vec2, vec4 } from 'gl-matrix';
 
 (function () {
   const gl = initGL();
   gl.clearColor(0.0, 0.0, 0.0, 1.0);
   gl.clear(gl.COLOR_BUFFER_BIT);
   gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-  const rectangle = new Rectangle(gl, { v1: [ 0, 0 ], v2: [ 0.9, 1 ] });
+  const localMatrix = mat3.fromScaling(mat3.create(), vec2.fromValues(0.4, 0.4));
+  const worldMatrix = mat3.fromTranslation(mat3.create(), vec2.fromValues(-1, -1));
+  const rectangle = new Rectangle(gl, { localMatrix, worldMatrix, color: vec4.fromValues(1, 1, 0, 1) });
   rectangle.draw();
 }());

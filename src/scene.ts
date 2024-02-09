@@ -15,7 +15,7 @@ export class Scene {
       throw new Error(PRIMITIVE_DOES_NOT_EXIST);
     }
     const gl = initGL();
-    const node = new primitives[ scene.type ](gl, scene.properties);
+    // const node = new primitives[ scene.type ](gl, scene.properties);
 
   }
 
