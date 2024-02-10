@@ -1,12 +1,16 @@
 import { compileShader, createProgram } from '../gl';
 import { mat3, vec4 } from 'gl-matrix';
 import { FAILED_TO_CREATE_BUFFER } from '../errors';
-import { PrimitiveParams } from '../types';
+import { type BasePrimitive, isPrimitiveBaseProperties, type PrimitiveBaseProperties } from '../types';
 
-export class Rectangle {
-  public localMatrix: mat3;
-  public worldMatrix: mat3;
-  public color: vec4;
+interface RectangleProps extends PrimitiveBaseProperties {
+  color: vec4
+}
+
+export class Rectangle implements BasePrimitive {
+  localMatrix: mat3;
+  worldMatrix: mat3;
+  color: vec4;
 
   gl: WebGLRenderingContext;
   #program: WebGLProgram;
@@ -18,7 +22,7 @@ export class Rectangle {
     0.0, 1.0,
     0.0, 1.0,
     1.0, 0.0,
-    1.0, 1.0,
+    1.0, 1.0
   ]);
 
   readonly vertexShaderSource = `#version 300 es
@@ -43,7 +47,7 @@ export class Rectangle {
     }
 `;
 
-  constructor(gl: WebGLRenderingContext, { localMatrix, worldMatrix, color }: PrimitiveParams) {
+  constructor(gl: WebGLRenderingContext, { localMatrix, worldMatrix, color }: RectangleProps) {
     this.gl = gl;
     this.localMatrix = localMatrix;
     this.worldMatrix = worldMatrix;
@@ -62,6 +66,13 @@ export class Rectangle {
     gl.bindBuffer(gl.ARRAY_BUFFER, this.#buffer);
     gl.bufferData(gl.ARRAY_BUFFER, this.defaultVertices, gl.STATIC_DRAW);
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
+  }
+
+  static runtimeCheckProperties(props: unknown): props is RectangleProps {
+    return isPrimitiveBaseProperties(props)
+      && 'color' in props
+      && props.color instanceof Float32Array
+      && props.color.length === 4;
   }
 
   draw(): void {
@@ -85,5 +96,9 @@ export class Rectangle {
     this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
 
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, null);
+  }
+
+  updateWorldMatrix(worldMatrix: mat3) {
+
   }
 }
