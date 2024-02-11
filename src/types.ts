@@ -2,26 +2,26 @@ import { type mat3 } from 'gl-matrix';
 
 export interface BasePrimitive {
   gl: WebGLRenderingContext;
-  worldMatrix: mat3,
-  localMatrix: mat3,
+  world: mat3,
+  local: mat3,
   draw?(): void
-  updateWorldMatrix(parentWorldMatrix?: mat3): void;
+  updateWorld(parentworld?: mat3): void;
 }
 
 export interface PrimitiveBaseProperties {
-  worldMatrix: mat3,
-  localMatrix: mat3
+  world: mat3,
+  local: mat3
 }
 
 export function isPrimitiveBaseProperties (props: unknown): props is PrimitiveBaseProperties {
   return !!props
     && typeof props === 'object'
-    && 'localMatrix' in props
-    && 'worldMatrix' in props
-    && props.localMatrix instanceof Float32Array
-    && props.localMatrix.length === 9
-    && props.worldMatrix instanceof Float32Array
-    && props.worldMatrix.length === 9
+    && 'local' in props
+    && 'world' in props
+    && props.local instanceof Float32Array
+    && props.local.length === 9
+    && props.world instanceof Float32Array
+    && props.world.length === 9
 }
 
 export const sceneDiscriminantType = {

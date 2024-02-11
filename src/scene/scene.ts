@@ -1,10 +1,9 @@
-import { isSceneNode, SceneConfig, sceneDiscriminantType, SceneNode } from './types';
-import { Rectangle } from './primitives/rectangle';
-import { Camera } from './primitives/camera';
-import { INCORRECT_PROPERTIES_IN_CONFIG, PRIMITIVE_DOES_NOT_EXIST, UNREACHABLE_STATE } from './errors';
+import { isSceneNode, SceneConfig, sceneDiscriminantType, SceneNode } from '../types';
+import { Camera, Rectangle } from '../primitives';
+import { INCORRECT_PROPERTIES_IN_CONFIG, PRIMITIVE_DOES_NOT_EXIST, UNREACHABLE_STATE } from '../errors';
 
 export class Scene {
-  private sceneNode: SceneNode;
+  sceneNode: SceneNode;
   #loopId: number | null = null;
 
   constructor(
@@ -55,7 +54,7 @@ export class Scene {
 
   private draw = (node: SceneNode, parent?: SceneNode) => {
     if (parent) {
-      node.instance.updateWorldMatrix(parent.instance.worldMatrix)
+      node.instance.updateWorld(parent.instance.world)
     }
     if (node.instance.draw) {
       node.instance.draw();

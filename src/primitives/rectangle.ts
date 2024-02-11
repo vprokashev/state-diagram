@@ -8,8 +8,8 @@ interface RectangleProps extends PrimitiveBaseProperties {
 }
 
 export class Rectangle implements BasePrimitive {
-  localMatrix: mat3;
-  worldMatrix: mat3;
+  local: mat3;
+  world: mat3;
   color: vec4;
 
   gl: WebGLRenderingContext;
@@ -27,12 +27,12 @@ export class Rectangle implements BasePrimitive {
 
   readonly vertexShaderSource = `#version 300 es
     in vec2 a_position;
-    uniform mat3 u_localMatrix;
-    uniform mat3 u_worldMatrix;
+    uniform mat3 u_local;
+    uniform mat3 u_world;
 
     void main() {
-      vec3 localPosition = u_localMatrix * vec3(a_position, 1.0);
-      vec3 transformedPosition = u_worldMatrix * localPosition;
+      vec3 localPosition = u_local * vec3(a_position, 1.0);
+      vec3 transformedPosition = u_world * localPosition;
       gl_Position = vec4(transformedPosition.xy, 0.0, 1.0);
     }
   `;
@@ -47,10 +47,10 @@ export class Rectangle implements BasePrimitive {
     }
 `;
 
-  constructor(gl: WebGLRenderingContext, { localMatrix, worldMatrix, color }: RectangleProps) {
+  constructor(gl: WebGLRenderingContext, { local, world, color }: RectangleProps) {
     this.gl = gl;
-    this.localMatrix = localMatrix;
-    this.worldMatrix = worldMatrix;
+    this.local = local;
+    this.world = world;
     this.color = color;
     const vertexShader = compileShader(this.gl, this.vertexShaderSource, this.gl.VERTEX_SHADER);
     const fragmentShader = compileShader(this.gl, this.fragmentShaderSource, this.gl.FRAGMENT_SHADER);
@@ -87,20 +87,20 @@ export class Rectangle implements BasePrimitive {
     this.gl.vertexAttribPointer(positionAttributeLocation, 2, this.gl.FLOAT, false, 0, 0);
     this.gl.enableVertexAttribArray(positionAttributeLocation);
 
-    const localMatrixUniformLocation = this.gl.getUniformLocation(this.#program, 'u_localMatrix');
-    this.gl.uniformMatrix3fv(localMatrixUniformLocation, false, this.localMatrix);
+    const localUniformLocation = this.gl.getUniformLocation(this.#program, 'u_local');
+    this.gl.uniformMatrix3fv(localUniformLocation, false, this.local);
 
-    const worldMatrixUniformLocation = this.gl.getUniformLocation(this.#program, 'u_worldMatrix');
-    this.gl.uniformMatrix3fv(worldMatrixUniformLocation, false, this.worldMatrix);
+    const worldUniformLocation = this.gl.getUniformLocation(this.#program, 'u_world');
+    this.gl.uniformMatrix3fv(worldUniformLocation, false, this.world);
 
     this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
 
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, null);
   }
 
-  updateWorldMatrix(parentWorldMatrix?: mat3) {
-    if (parentWorldMatrix) {
-      mat3.multiply(this.worldMatrix, parentWorldMatrix, this.worldMatrix);
+  updateWorld(parentWorld?: mat3) {
+    if (parentWorld) {
+      mat3.multiply(this.world, parentWorld, this.world);
     }
   }
 }
