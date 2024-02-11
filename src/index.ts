@@ -34,4 +34,4 @@ const sceneConfig: SceneConfig = {
 };
 
 const scene = new Scene(gl, sceneConfig);
-scene.loopStart();
+scene.start();

@@ -14,11 +14,11 @@ export class Scene {
     this.sceneNode = Scene.createSceneNodeByConfig(gl, sceneConfig);
   }
 
-  public loopStart() {
+  public start() {
     this.#loopId = requestAnimationFrame(this.#loop);
   }
 
-  public loopStop() {
+  public stop() {
     if (this.#loopId) {
       cancelAnimationFrame(this.#loopId);
       this.#loopId = null;
@@ -57,7 +57,9 @@ export class Scene {
     if (parent) {
       node.instance.updateWorldMatrix(parent.instance.worldMatrix)
     }
-    node.instance.draw();
+    if (node.instance.draw) {
+      node.instance.draw();
+    }
     if (node.children) {
       node.children.forEach((childNode) => this.draw(childNode, node));
     }

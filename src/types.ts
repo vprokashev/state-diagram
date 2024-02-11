@@ -2,15 +2,15 @@ import { type mat3 } from 'gl-matrix';
 
 export interface BasePrimitive {
   gl: WebGLRenderingContext;
-  localMatrix: mat3,
   worldMatrix: mat3,
-  draw(): void
-  updateWorldMatrix(worldMatrix: mat3): void;
+  localMatrix: mat3,
+  draw?(): void
+  updateWorldMatrix(parentWorldMatrix?: mat3): void;
 }
 
 export interface PrimitiveBaseProperties {
-  localMatrix: mat3,
-  worldMatrix: mat3
+  worldMatrix: mat3,
+  localMatrix: mat3
 }
 
 export function isPrimitiveBaseProperties (props: unknown): props is PrimitiveBaseProperties {

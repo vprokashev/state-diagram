@@ -98,7 +98,9 @@ export class Rectangle implements BasePrimitive {
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, null);
   }
 
-  updateWorldMatrix(worldMatrix: mat3) {
-
+  updateWorldMatrix(parentWorldMatrix?: mat3) {
+    if (parentWorldMatrix) {
+      mat3.multiply(this.worldMatrix, parentWorldMatrix, this.worldMatrix);
+    }
   }
 }
