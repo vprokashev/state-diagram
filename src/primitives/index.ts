@@ -1,2 +1,2 @@
-export { Camera } from './camera';
+export { Space } from './space';
 export { Rectangle } from './rectangle';

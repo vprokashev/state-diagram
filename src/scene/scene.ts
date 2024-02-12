@@ -1,5 +1,5 @@
 import { isSceneNode, SceneConfig, sceneDiscriminantType, SceneNode } from '../types';
-import { Camera, Rectangle } from '../primitives';
+import { Space, Rectangle } from '../primitives';
 import { INCORRECT_PROPERTIES_IN_CONFIG, PRIMITIVE_DOES_NOT_EXIST, UNREACHABLE_STATE } from '../errors';
 
 export class Scene {
@@ -27,11 +27,11 @@ export class Scene {
   static createSceneNodeByConfig = (gl: WebGLRenderingContext, config: SceneConfig): SceneNode => {
     let node: Partial<SceneNode> = {};
 
-    if (config.type === sceneDiscriminantType.camera) {
-      if (!Camera.runtimeCheckProperties(config.properties)) {
+    if (config.type === sceneDiscriminantType.space) {
+      if (!Space.runtimeCheckProperties(config.properties)) {
         throw new Error(INCORRECT_PROPERTIES_IN_CONFIG);
       }
-      node.instance = new Camera(gl, config.properties);
+      node.instance = new Space(gl, config.properties);
     } else if (config.type === sceneDiscriminantType.rectangle) {
       if (!Rectangle.runtimeCheckProperties(config.properties)) {
         throw new Error(INCORRECT_PROPERTIES_IN_CONFIG);

@@ -25,7 +25,7 @@ export function isPrimitiveBaseProperties (props: unknown): props is PrimitiveBa
 }
 
 export const sceneDiscriminantType = {
-  camera: 'camera',
+  space: 'space',
   rectangle: 'rectangle'
 } as const;
 

@@ -8,7 +8,7 @@ import { Rectangle } from './primitives';
 const gl = initGL();
 
 const sceneConfig = {
-  type: sceneDiscriminantType.camera,
+  type: sceneDiscriminantType.space,
   properties: {
     local: mat3.create(),
     world: mat3.create()
