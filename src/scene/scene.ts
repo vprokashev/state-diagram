@@ -1,6 +1,7 @@
 import { isSceneNode, SceneConfig, sceneDiscriminantType, SceneNode } from '../types';
 import { Space, Rectangle } from '../primitives';
 import { INCORRECT_PROPERTIES_IN_CONFIG, PRIMITIVE_DOES_NOT_EXIST, UNREACHABLE_STATE } from '../errors';
+import { resizeCanvasToDisplaySize } from '../gl';
 
 export class Scene {
   sceneNode: SceneNode;
@@ -65,6 +66,7 @@ export class Scene {
   }
 
   #loop = () => {
+    resizeCanvasToDisplaySize(this.gl.canvas as HTMLCanvasElement);
     this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
     this.gl.enable(this.gl.CULL_FACE);
     this.gl.enable(this.gl.DEPTH_TEST);

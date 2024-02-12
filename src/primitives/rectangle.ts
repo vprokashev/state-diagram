@@ -16,24 +16,47 @@ export class Rectangle implements BasePrimitive {
   #program: WebGLProgram;
   #buffer!: WebGLBuffer | null;
 
-  readonly defaultVertices = new Float32Array([
-    0.0, 0.0,
-    1.0, 0.0,
-    0.0, 1.0,
-    0.0, 1.0,
-    1.0, 0.0,
-    1.0, 1.0
-  ]);
+  setVertices(x:number, y:number, width: number, height: number) {
+    const x1 = x;
+    const x2 = x + width;
+    const y1 = y;
+    const y2 = y + height;
+    this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array([
+      x1, y1,
+      x2, y1,
+      x1, y2,
+      x1, y2,
+      x2, y1,
+      x2, y2,
+    ]), this.gl.STATIC_DRAW);
+  }
+
+  updateVertices(x:number, y:number, width: number, height: number) {
+    const x1 = x;
+    const x2 = x + width;
+    const y1 = y;
+    const y2 = y + height;
+    this.gl.bufferSubData(this.gl.ARRAY_BUFFER, 0, new Float32Array([
+      x1, y1,
+      x2, y1,
+      x1, y2,
+      x1, y2,
+      x2, y1,
+      x2, y2,
+    ]));
+  }
 
   readonly vertexShaderSource = `#version 300 es
     in vec2 a_position;
     uniform mat3 u_local;
     uniform mat3 u_world;
+    uniform vec2 u_resolution;
 
     void main() {
-      vec3 localPosition = u_local * vec3(a_position, 1.0);
-      vec3 transformedPosition = u_world * localPosition;
-      gl_Position = vec4(transformedPosition.xy, 0.0, 1.0);
+      vec2 zeroToOne = a_position.xy / u_resolution;
+      vec2 zeroToTwo = zeroToOne * 2.0;
+      vec2 clipSpace = zeroToTwo - 1.0;
+      gl_Position = vec4(clipSpace, 0, 1);
     }
   `;
 
@@ -64,7 +87,7 @@ export class Rectangle implements BasePrimitive {
       throw new Error(FAILED_TO_CREATE_BUFFER);
     }
     gl.bindBuffer(gl.ARRAY_BUFFER, this.#buffer);
-    gl.bufferData(gl.ARRAY_BUFFER, this.defaultVertices, gl.STATIC_DRAW);
+    this.setVertices(10, 20, 70, 30);
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
   }
 
@@ -80,12 +103,17 @@ export class Rectangle implements BasePrimitive {
 
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.#buffer);
 
+    this.updateVertices(10, 10, 200, 300);
+
     const colorUniformLocation = this.gl.getUniformLocation(this.#program, 'u_color');
     this.gl.uniform4fv(colorUniformLocation, this.color);
 
     const positionAttributeLocation = this.gl.getAttribLocation(this.#program, 'a_position');
     this.gl.vertexAttribPointer(positionAttributeLocation, 2, this.gl.FLOAT, false, 0, 0);
     this.gl.enableVertexAttribArray(positionAttributeLocation);
+
+    const resolutionUniformLocation = this.gl.getUniformLocation(this.#program, 'u_resolution');
+    this.gl.uniform2f(resolutionUniformLocation, this.gl.canvas.width, this.gl.canvas.height);
 
     const localUniformLocation = this.gl.getUniformLocation(this.#program, 'u_local');
     this.gl.uniformMatrix3fv(localUniformLocation, false, this.local);
@@ -96,6 +124,8 @@ export class Rectangle implements BasePrimitive {
     this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
 
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, null);
+
+    this.gl.useProgram(null);
   }
 
   updateWorld(parentWorld?: mat3) {
