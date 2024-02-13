@@ -31,21 +31,6 @@ export class Rectangle implements BasePrimitive {
     ]), this.gl.STATIC_DRAW);
   }
 
-  updateVertices(x:number, y:number, width: number, height: number) {
-    const x1 = x;
-    const x2 = x + width;
-    const y1 = y;
-    const y2 = y + height;
-    this.gl.bufferSubData(this.gl.ARRAY_BUFFER, 0, new Float32Array([
-      x1, y1,
-      x2, y1,
-      x1, y2,
-      x1, y2,
-      x2, y1,
-      x2, y2,
-    ]));
-  }
-
   readonly vertexShaderSource = `#version 300 es
     in vec2 a_position;
     uniform mat3 u_local;
@@ -102,8 +87,6 @@ export class Rectangle implements BasePrimitive {
     this.gl.useProgram(this.#program);
 
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.#buffer);
-
-    this.updateVertices(10, 10, 200, 300);
 
     const colorUniformLocation = this.gl.getUniformLocation(this.#program, 'u_color');
     this.gl.uniform4fv(colorUniformLocation, this.color);
