@@ -1,33 +1,41 @@
 import { mat3, vec2 } from 'gl-matrix';
 
-export function applyWorldToPoint(outPoint: vec2, point: vec2, world: mat3): void {
-    const vertex = vec2.fromValues(point[ 0 ], point[ 1 ]);
-    vec2.transformMat3(outPoint, vertex, world);
-}
-
-export function applyWorldToBufferVertices(outVertices: Float32Array, bufferVertices: Float32Array, world: mat3): void {
+export function transformBufferVertices(
+  outVertices: Float32Array,
+  bufferVertices: Float32Array,
+  translation: vec2,
+  scale: vec2
+): void {
   for (let index = 0; index < bufferVertices.length; index += 2) {
     const vertexPoint = vec2.fromValues(bufferVertices[ index ], bufferVertices[ index + 1 ]);
-    applyWorldToPoint(vertexPoint, vertexPoint, world);
+    vec2.set(vertexPoint, vertexPoint[ 0 ] * scale[ 0 ], vertexPoint[ 1 ] * scale[ 1 ]);
+    vec2.add(vertexPoint, vertexPoint, translation);
     outVertices[ index ] = vertexPoint[ 0 ];
     outVertices[ index + 1 ] = vertexPoint[ 1 ];
   }
 }
 
-export function pointIntersectShape(point: vec2, vertices: Float32Array, world: mat3, canvasSize: vec2) {
-  const normalizedPoint = vec2.create();
-  vec2.divide(normalizedPoint, point, canvasSize);
+export function normalizeCanvasCoordinates(outPoint: vec2, point: vec2, canvasSize: vec2) {
+  vec2.divide(outPoint, point, canvasSize);
+  outPoint[ 0 ] = Math.max(-1, Math.min(outPoint[ 0 ] * 2 - 1, 1));
+  outPoint[ 1 ] = Math.max(-1, Math.min(1 - outPoint[ 1 ] * 2, 1));
+}
 
-  const transformedVertices = new Float32Array(vertices.length);
-  applyWorldToBufferVertices(transformedVertices, vertices, world);
+export function pointIntersectShape(
+  point: vec2,
+  vertices: Float32Array,
+  canvasSize: vec2
+) {
+  const normalizedPoint = vec2.create();
+  normalizeCanvasCoordinates(normalizedPoint, point, canvasSize);
 
   let intersections = 0;
 
-  for (let index = 0; index < transformedVertices.length; index += 2) {
-    const startX = transformedVertices[index];
-    const startY = transformedVertices[index + 1];
-    const endX = transformedVertices[(index + 2) % transformedVertices.length];
-    const endY = transformedVertices[(index + 3) % transformedVertices.length];
+  for (let index = 0; index < vertices.length; index += 2) {
+    const startX = vertices[index];
+    const startY = vertices[index + 1];
+    const endX = vertices[(index + 2) % vertices.length];
+    const endY = vertices[(index + 3) % vertices.length];
 
     if (
       (startY > normalizedPoint[1]) !== (endY > normalizedPoint[1]) &&
@@ -54,13 +62,4 @@ export function setRectangleVertices(x:number, y:number, width: number, height: 
     x2, y1,
     x2, y2,
   ]);
-}
-
-export function createTransformMatrix(translation: vec2, scale: vec2): mat3 {
-  const matrix = mat3.create();
-
-  mat3.fromTranslation(matrix, translation);
-  mat3.scale(matrix, matrix, scale);
-
-  return matrix;
 }

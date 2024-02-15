@@ -4,7 +4,7 @@ import { Scene } from './scene';
 import { SceneConfig, sceneDiscriminantType } from './types';
 import { getFirstNode } from './scene/tools';
 import { Rectangle } from './primitives';
-import { createTransformMatrix, pointIntersectShape } from './math';
+import { transformBufferVertices, pointIntersectShape } from './math';
 
 const gl = initGL();
 
@@ -60,10 +60,19 @@ if (canvas) {
   const { x, y, width, height } = canvas.getBoundingClientRect();
   canvas.addEventListener('mousemove', (e: MouseEvent) => {
     if (rectangle) {
+      const vertices = (rectangle.instance as Rectangle).vertices;
+      const transformedVertices = new Float32Array(vertices.length);
+
+      transformBufferVertices(
+        transformedVertices,
+        vertices,
+        rectangle.instance.translation,
+        rectangle.instance.scale
+      );
+
       if (pointIntersectShape(
         vec2.fromValues(e.clientX - x, e.clientY - y),
-        (rectangle.instance as Rectangle).vertices,
-        createTransformMatrix(rectangle.instance.translation, rectangle.instance.scale),
+        transformedVertices,
         vec2.fromValues(width, height)
       )) {
         (rectangle.instance as Rectangle).color = vec4.fromValues(0.5, 1, 0.5, 1);

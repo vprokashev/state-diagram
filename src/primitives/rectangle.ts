@@ -24,7 +24,6 @@ export class Rectangle implements BasePrimitive {
     this.gl = gl;
     this.scale = scale;
     this.translation = translation;
-    debugger;
     this.color = color;
     const vertexShader = compileShader(this.gl, vertexShaderSource, this.gl.VERTEX_SHADER);
     const fragmentShader = compileShader(this.gl, fragmentShaderSource, this.gl.FRAGMENT_SHADER);
