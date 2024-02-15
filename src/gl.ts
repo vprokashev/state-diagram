@@ -1,11 +1,11 @@
 import { CANVAS_NOT_FOND, SHADER_COMPILATION_ERROR, UNABLE_TO_CREATE_PROGRAM, UNABLE_TO_LINK_PROGRAM, WEB_GL_NOT_SUPPORTED } from './errors';
 
 export function initGL(): WebGLRenderingContext {
-  const canvas = <HTMLCanvasElement>document.querySelector("#canvas");
+  const canvas = <HTMLCanvasElement>document.querySelector('#canvas');
   if (!canvas) {
     throw new Error(CANVAS_NOT_FOND);
   }
-  const gl = canvas.getContext("webgl2");
+  const gl = canvas.getContext('webgl2');
   if (!gl) {
     throw new Error(WEB_GL_NOT_SUPPORTED);
   }
@@ -50,10 +50,10 @@ export function createProgram(gl: WebGLRenderingContext, vertexShader: WebGLShad
 }
 
 export function resizeCanvasToDisplaySize(canvas: HTMLCanvasElement, multiplier: number = 1): void {
-  const width  = canvas.clientWidth  * multiplier | 0;
+  const width = canvas.clientWidth * multiplier | 0;
   const height = canvas.clientHeight * multiplier | 0;
-  if (canvas.width !== width ||  canvas.height !== height) {
-    canvas.width  = width;
+  if (canvas.width !== width || canvas.height !== height) {
+    canvas.width = width;
     canvas.height = height;
   }
 }

@@ -9,11 +9,11 @@ export interface BasePrimitive {
 }
 
 export interface PrimitiveBaseProperties {
-  scale: vec2
-  translation: vec2
+  scale: vec2;
+  translation: vec2;
 }
 
-export function isPrimitiveBaseProperties (props: unknown): props is PrimitiveBaseProperties {
+export function isPrimitiveBaseProperties(props: unknown): props is PrimitiveBaseProperties {
   return !!props
     && typeof props === 'object'
     && 'scale' in props
@@ -21,7 +21,7 @@ export function isPrimitiveBaseProperties (props: unknown): props is PrimitiveBa
     && props.scale instanceof Float32Array
     && props.scale.length === 2
     && props.translation instanceof Float32Array
-    && props.translation.length === 2
+    && props.translation.length === 2;
 }
 
 export const sceneDiscriminantType = {
@@ -43,5 +43,5 @@ export interface SceneNode {
 export function isSceneNode(node: unknown): node is SceneNode {
   return !!node
     && typeof node === 'object'
-    && 'instance' in node
+    && 'instance' in node;
 }

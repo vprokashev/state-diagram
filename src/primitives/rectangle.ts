@@ -7,7 +7,7 @@ import fragmentShaderSource from './common.frag';
 import { setRectangleVertices } from '../math';
 
 interface RectangleProps extends PrimitiveBaseProperties {
-  color: vec4
+  color: vec4;
 }
 
 export class Rectangle implements BasePrimitive {

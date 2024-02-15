@@ -7,7 +7,7 @@ function* createSceneIterator(node: SceneNode): Generator<SceneNode, void> {
 
   if (childes && !!childes.length) {
     for (let i = 0; i < childes.length; i++) {
-      yield* createSceneIterator(childes[i]);
+      yield* createSceneIterator(childes[ i ]);
     }
   }
 }

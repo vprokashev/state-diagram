@@ -36,14 +36,14 @@ export function pointIntersectShape(
       vec2.fromValues(vertices[ i + 2 ], vertices[ i + 3 ]),
       vec2.fromValues(vertices[ i + 4 ], vertices[ i + 5 ])
     )) {
-      return true
+      return true;
     }
   }
 
   return false;
 }
 
-export function setRectangleVertices(x:number, y:number, width: number, height: number) {
+export function setRectangleVertices(x: number, y: number, width: number, height: number) {
   const x1 = x;
   const x2 = x + width;
   const y1 = y;
@@ -55,7 +55,7 @@ export function setRectangleVertices(x:number, y:number, width: number, height: 
     x1, y2,
     x1, y2,
     x2, y1,
-    x2, y2,
+    x2, y2
   ]);
 }
 
@@ -71,5 +71,5 @@ function pointInsideTriangle(point: vec2, v0: vec2, v1: vec2, v2: vec2): boolean
 }
 
 function sign(p1: vec2, p2: vec2, p3: vec2): number {
-  return (p1[0] - p3[0]) * (p2[1] - p3[1]) - (p2[0] - p3[0]) * (p1[1] - p3[1]);
+  return (p1[ 0 ] - p3[ 0 ]) * (p2[ 1 ] - p3[ 1 ]) - (p2[ 0 ] - p3[ 0 ]) * (p1[ 1 ] - p3[ 1 ]);
 }

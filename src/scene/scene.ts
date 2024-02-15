@@ -51,11 +51,11 @@ export class Scene {
     }
 
     throw new Error(UNREACHABLE_STATE);
-  }
+  };
 
   private draw = (node: SceneNode, parent?: SceneNode) => {
     if (parent) {
-      node.instance.updateWorld(parent.instance.translation)
+      node.instance.updateWorld(parent.instance.translation);
     }
     if (node.children) {
       node.children.forEach((childNode) => this.draw(childNode, node));
@@ -63,7 +63,7 @@ export class Scene {
     if (node.instance.draw) {
       node.instance.draw();
     }
-  }
+  };
 
   #loop = () => {
     resizeCanvasToDisplaySize(this.gl.canvas as HTMLCanvasElement);
@@ -74,5 +74,5 @@ export class Scene {
     this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
     this.draw(this.sceneNode);
     this.#loopId = requestAnimationFrame(this.#loop);
-  }
+  };
 }
