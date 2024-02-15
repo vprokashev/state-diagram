@@ -1,42 +1,30 @@
 import { compileShader, createProgram } from '../gl';
-import { mat3, vec4 } from 'gl-matrix';
+import { mat3, vec2, vec4 } from 'gl-matrix';
 import { FAILED_TO_CREATE_BUFFER } from '../errors';
 import { type BasePrimitive, isPrimitiveBaseProperties, type PrimitiveBaseProperties } from '../types';
 import vertexShaderSource from './common.vert';
 import fragmentShaderSource from './common.frag';
+import { setRectangleVertices } from '../math';
 
 interface RectangleProps extends PrimitiveBaseProperties {
   color: vec4
 }
 
 export class Rectangle implements BasePrimitive {
-  local: mat3;
-  world: mat3;
+  scale: vec2;
+  translation: vec2;
   color: vec4;
+  vertices!: Float32Array;
 
   gl: WebGLRenderingContext;
   #program: WebGLProgram;
   #buffer!: WebGLBuffer | null;
 
-  setVertices(x:number, y:number, width: number, height: number) {
-    const x1 = x;
-    const x2 = x + width;
-    const y1 = y;
-    const y2 = y + height;
-    this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array([
-      x1, y1,
-      x2, y1,
-      x1, y2,
-      x1, y2,
-      x2, y1,
-      x2, y2,
-    ]), this.gl.STATIC_DRAW);
-  }
-
-  constructor(gl: WebGLRenderingContext, { local, world, color }: RectangleProps) {
+  constructor(gl: WebGLRenderingContext, { scale, translation, color }: RectangleProps) {
     this.gl = gl;
-    this.local = local;
-    this.world = world;
+    this.scale = scale;
+    this.translation = translation;
+    debugger;
     this.color = color;
     const vertexShader = compileShader(this.gl, vertexShaderSource, this.gl.VERTEX_SHADER);
     const fragmentShader = compileShader(this.gl, fragmentShaderSource, this.gl.FRAGMENT_SHADER);
@@ -50,7 +38,8 @@ export class Rectangle implements BasePrimitive {
       throw new Error(FAILED_TO_CREATE_BUFFER);
     }
     gl.bindBuffer(gl.ARRAY_BUFFER, this.#buffer);
-    this.setVertices(0, 0, 1, 1);
+    this.vertices = setRectangleVertices(0, 0, 1, 1);
+    this.gl.bufferData(this.gl.ARRAY_BUFFER, this.vertices, this.gl.STATIC_DRAW);
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
   }
 
@@ -73,11 +62,11 @@ export class Rectangle implements BasePrimitive {
     this.gl.vertexAttribPointer(positionAttributeLocation, 2, this.gl.FLOAT, false, 0, 0);
     this.gl.enableVertexAttribArray(positionAttributeLocation);
 
-    const localUniformLocation = this.gl.getUniformLocation(this.#program, 'u_local');
-    this.gl.uniformMatrix3fv(localUniformLocation, false, this.local);
+    const uniformScale = this.gl.getUniformLocation(this.#program, 'u_scale');
+    this.gl.uniform2f(uniformScale, this.scale[ 0 ], this.scale[ 1 ]);
 
-    const worldUniformLocation = this.gl.getUniformLocation(this.#program, 'u_world');
-    this.gl.uniformMatrix3fv(worldUniformLocation, false, this.world);
+    const uniformTranslation = this.gl.getUniformLocation(this.#program, 'u_translation');
+    this.gl.uniform2f(uniformTranslation, this.translation[ 0 ], this.translation[ 1 ]);
 
     this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
 
@@ -86,9 +75,9 @@ export class Rectangle implements BasePrimitive {
     this.gl.useProgram(null);
   }
 
-  updateWorld(parentWorld?: mat3) {
-    if (parentWorld) {
-      mat3.multiply(this.world, parentWorld, this.world);
+  updateWorld(parentTranslation?: vec2) {
+    if (parentTranslation) {
+      vec2.add(this.translation, parentTranslation, this.translation);
     }
   }
 }

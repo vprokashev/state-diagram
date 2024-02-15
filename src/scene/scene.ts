@@ -55,13 +55,13 @@ export class Scene {
 
   private draw = (node: SceneNode, parent?: SceneNode) => {
     if (parent) {
-      node.instance.updateWorld(parent.instance.world)
-    }
-    if (node.instance.draw) {
-      node.instance.draw();
+      node.instance.updateWorld(parent.instance.translation)
     }
     if (node.children) {
       node.children.forEach((childNode) => this.draw(childNode, node));
+    }
+    if (node.instance.draw) {
+      node.instance.draw();
     }
   }
 

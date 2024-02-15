@@ -1,27 +1,27 @@
-import { type mat3 } from 'gl-matrix';
+import { type mat3, type vec2 } from 'gl-matrix';
 
 export interface BasePrimitive {
   gl: WebGLRenderingContext;
-  world: mat3,
-  local: mat3,
+  scale: vec2,
+  translation: vec2,
   draw?(): void
-  updateWorld(parentworld?: mat3): void;
+  updateWorld(parentTranslation?: vec2): void;
 }
 
 export interface PrimitiveBaseProperties {
-  world: mat3,
-  local: mat3
+  scale: vec2
+  translation: vec2
 }
 
 export function isPrimitiveBaseProperties (props: unknown): props is PrimitiveBaseProperties {
   return !!props
     && typeof props === 'object'
-    && 'local' in props
-    && 'world' in props
-    && props.local instanceof Float32Array
-    && props.local.length === 9
-    && props.world instanceof Float32Array
-    && props.world.length === 9
+    && 'scale' in props
+    && 'translation' in props
+    && props.scale instanceof Float32Array
+    && props.scale.length === 2
+    && props.translation instanceof Float32Array
+    && props.translation.length === 2
 }
 
 export const sceneDiscriminantType = {
