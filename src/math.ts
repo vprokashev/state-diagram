@@ -29,23 +29,18 @@ export function pointIntersectShape(
   const normalizedPoint = vec2.create();
   normalizeCanvasCoordinates(normalizedPoint, point, canvasSize);
 
-  let intersections = 0;
-
-  for (let index = 0; index < vertices.length; index += 2) {
-    const startX = vertices[index];
-    const startY = vertices[index + 1];
-    const endX = vertices[(index + 2) % vertices.length];
-    const endY = vertices[(index + 3) % vertices.length];
-
-    if (
-      (startY > normalizedPoint[1]) !== (endY > normalizedPoint[1]) &&
-      normalizedPoint[0] < (endX - startX) * (normalizedPoint[1] - startY) / (endY - startY) + startX
-    ) {
-      intersections++;
+  for (let i = 0; i < vertices.length; i += 6) {
+    if (pointInsideTriangle(
+      normalizedPoint,
+      vec2.fromValues(vertices[ i ], vertices[ i + 1 ]),
+      vec2.fromValues(vertices[ i + 2 ], vertices[ i + 3 ]),
+      vec2.fromValues(vertices[ i + 4 ], vertices[ i + 5 ])
+    )) {
+      return true
     }
   }
 
-  return intersections % 2 !== 0;
+  return false;
 }
 
 export function setRectangleVertices(x:number, y:number, width: number, height: number) {
@@ -62,4 +57,19 @@ export function setRectangleVertices(x:number, y:number, width: number, height: 
     x2, y1,
     x2, y2,
   ]);
+}
+
+function pointInsideTriangle(point: vec2, v0: vec2, v1: vec2, v2: vec2): boolean {
+  const d1 = sign(point, v0, v1);
+  const d2 = sign(point, v1, v2);
+  const d3 = sign(point, v2, v0);
+
+  const hasNeg = (d1 < 0) || (d2 < 0) || (d3 < 0);
+  const hasPos = (d1 > 0) || (d2 > 0) || (d3 > 0);
+
+  return !(hasNeg && hasPos);
+}
+
+function sign(p1: vec2, p2: vec2, p3: vec2): number {
+  return (p1[0] - p3[0]) * (p2[1] - p3[1]) - (p2[0] - p3[0]) * (p1[1] - p3[1]);
 }
