@@ -1,4 +1,4 @@
-import { compileShader, createProgram } from '../../graphical-tools/gl';
+import { bindUniforms, compileShader, createProgram } from '../../graphical-tools/gl';
 import { vec2, vec4 } from 'gl-matrix';
 import { FAILED_TO_CREATE_BUFFER } from '../../errors';
 import { type BasePrimitive, isPrimitiveBaseProperties, type PrimitiveBaseProperties } from '../../types';
@@ -19,6 +19,7 @@ export class Rectangle implements BasePrimitive {
   gl: WebGLRenderingContext;
   #program: WebGLProgram;
   #buffer!: WebGLBuffer | null;
+  #uniformLocation: Record<'color' | 'translation' | 'scale' | 'parentTranslation', WebGLUniformLocation>;
 
   constructor(gl: WebGLRenderingContext, { scale, translation, color }: RectangleProps) {
     this.gl = gl;
@@ -28,6 +29,16 @@ export class Rectangle implements BasePrimitive {
     const vertexShader = compileShader(this.gl, vertexShaderSource, this.gl.VERTEX_SHADER);
     const fragmentShader = compileShader(this.gl, fragmentShaderSource, this.gl.FRAGMENT_SHADER);
     this.#program = createProgram(this.gl, vertexShader, fragmentShader);
+    this.#uniformLocation = bindUniforms(
+      gl,
+      this.#program,
+      {
+        color: 'u_color',
+        scale: 'u_scale',
+        translation: 'u_translation',
+        parentTranslation: 'u_parent_translation'
+      }
+    );
     this.initBuffer(gl);
   }
 
@@ -51,31 +62,20 @@ export class Rectangle implements BasePrimitive {
 
   draw(translation: vec2): void {
     this.gl.useProgram(this.#program);
+    this.gl.uniform4fv(this.#uniformLocation.color, this.color);
+    this.gl.uniform2f(this.#uniformLocation.scale, this.scale[ 0 ], this.scale[ 1 ]);
+    this.gl.uniform2f(this.#uniformLocation.translation, this.translation[ 0 ], this.translation[ 1 ]);
+    this.gl.uniform2f(this.#uniformLocation.parentTranslation, translation[ 0 ], translation[ 1 ]);
 
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.#buffer);
-
-    const colorUniformLocation = this.gl.getUniformLocation(this.#program, 'u_color');
-    this.gl.uniform4fv(colorUniformLocation, this.color);
-
     const positionAttributeLocation = this.gl.getAttribLocation(this.#program, 'a_position');
     this.gl.vertexAttribPointer(positionAttributeLocation, 2, this.gl.FLOAT, false, 0, 0);
     this.gl.enableVertexAttribArray(positionAttributeLocation);
 
-    const uniformScale = this.gl.getUniformLocation(this.#program, 'u_scale');
-    this.gl.uniform2f(uniformScale, this.scale[ 0 ], this.scale[ 1 ]);
-
-    const uniformTranslation = this.gl.getUniformLocation(this.#program, 'u_translation');
-    this.gl.uniform2f(uniformTranslation, this.translation[ 0 ], this.translation[ 1 ]);
-
-    const uniformParentTranslation = this.gl.getUniformLocation(this.#program, 'u_parent_translation');
-    this.gl.uniform2f(uniformParentTranslation, translation[ 0 ], translation[ 1 ]);
-
     this.gl.drawArrays(this.gl.TRIANGLES, 0, this.vertices.length / 2);
 
     this.gl.disableVertexAttribArray(positionAttributeLocation);
-
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, null);
-
     this.gl.useProgram(null);
   }
 

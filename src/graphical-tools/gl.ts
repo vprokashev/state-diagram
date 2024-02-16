@@ -1,4 +1,4 @@
-import { CANVAS_NOT_FOND, SHADER_COMPILATION_ERROR, UNABLE_TO_CREATE_PROGRAM, UNABLE_TO_LINK_PROGRAM, WEB_GL_NOT_SUPPORTED } from '../errors';
+import { CANVAS_NOT_FOND, SHADER_COMPILATION_ERROR, UNABLE_TO_CREATE_PROGRAM, UNABLE_TO_LINK_PROGRAM, UNIFORM_VARIABLE_MISMATCH, UNREACHABLE_STATE, WEB_GL_NOT_SUPPORTED } from '../errors';
 
 export function initGL(): WebGLRenderingContext {
   const canvas = <HTMLCanvasElement>document.querySelector('#canvas');
@@ -56,4 +56,36 @@ export function resizeCanvasToDisplaySize(canvas: HTMLCanvasElement, multiplier:
     canvas.width = width;
     canvas.height = height;
   }
+}
+
+export function bindUniforms<N extends Record<string, string>>(
+  gl: WebGLRenderingContext,
+  program: WebGLProgram,
+  dictionary: N
+): Record<keyof N, WebGLUniformLocation> {
+  const uniformCountInShader = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
+  const namesInShader = [];
+  for (let index = 0; index < uniformCountInShader; index++) {
+    const activeUniformInfo = gl.getActiveUniform(program, index) as WebGLActiveInfo;
+    namesInShader.push(activeUniformInfo.name);
+  }
+
+  const glNames = Object.values(dictionary);
+  const match = namesInShader.every((uniformName) => glNames.indexOf(uniformName) > -1);
+
+  if (uniformCountInShader !== glNames.length || !match) {
+    throw new Error(`${ UNIFORM_VARIABLE_MISMATCH }\nIn the shader: ${ namesInShader.join(', ') }\nPassed: ${ glNames.join(', ') }`);
+  }
+
+  const result:Record<string, WebGLUniformLocation> = {};
+  const dictionaryNames = Object.keys(dictionary);
+  for (let index = 0; index < dictionaryNames.length; index++) {
+    const currentName = dictionaryNames[ index ];
+    const location = gl.getUniformLocation(program, dictionary[ currentName ]);
+    if (!location) {
+      throw new Error(UNREACHABLE_STATE);
+    }
+    result[ currentName ] = location
+  }
+  return result as Record<keyof N, WebGLUniformLocation>;
 }
