@@ -1,4 +1,4 @@
-import { CANVAS_NOT_FOND, SHADER_COMPILATION_ERROR, UNABLE_TO_CREATE_PROGRAM, UNABLE_TO_LINK_PROGRAM, WEB_GL_NOT_SUPPORTED } from './errors';
+import { CANVAS_NOT_FOND, SHADER_COMPILATION_ERROR, UNABLE_TO_CREATE_PROGRAM, UNABLE_TO_LINK_PROGRAM, WEB_GL_NOT_SUPPORTED } from '../errors';
 
 export function initGL(): WebGLRenderingContext {
   const canvas = <HTMLCanvasElement>document.querySelector('#canvas');

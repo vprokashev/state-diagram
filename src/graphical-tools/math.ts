@@ -1,4 +1,4 @@
-import { mat3, vec2 } from 'gl-matrix';
+import { vec2 } from 'gl-matrix';
 
 export function transformBufferVertices(
   outVertices: Float32Array,
@@ -41,22 +41,6 @@ export function pointIntersectShape(
   }
 
   return false;
-}
-
-export function setRectangleVertices(x: number, y: number, width: number, height: number) {
-  const x1 = x;
-  const x2 = x + width;
-  const y1 = y;
-  const y2 = y + height;
-
-  return new Float32Array([
-    x1, y1,
-    x2, y1,
-    x1, y2,
-    x1, y2,
-    x2, y1,
-    x2, y2
-  ]);
 }
 
 function pointInsideTriangle(point: vec2, v0: vec2, v1: vec2, v2: vec2): boolean {

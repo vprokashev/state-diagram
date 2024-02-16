@@ -1,7 +1,7 @@
 import { isSceneNode, SceneConfig, sceneDiscriminantType, SceneNode } from '../types';
 import { Space, Rectangle } from '../primitives';
 import { INCORRECT_PROPERTIES_IN_CONFIG, PRIMITIVE_DOES_NOT_EXIST, UNREACHABLE_STATE } from '../errors';
-import { resizeCanvasToDisplaySize } from '../gl';
+import { resizeCanvasToDisplaySize } from '../graphical-tools/gl';
 import { vec2 } from 'gl-matrix';
 
 export class Scene {

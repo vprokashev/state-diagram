@@ -1,10 +1,10 @@
-import { initGL } from './gl';
-import { mat3, vec2, vec4 } from 'gl-matrix';
+import { initGL } from './graphical-tools/gl';
+import { vec2, vec4 } from 'gl-matrix';
 import { Scene } from './scene';
 import { SceneConfig, sceneDiscriminantType } from './types';
 import { getFirstNode } from './scene/tools';
 import { Rectangle } from './primitives';
-import { transformBufferVertices, pointIntersectShape } from './math';
+import { transformBufferVertices, pointIntersectShape } from './graphical-tools/math';
 
 const gl = initGL();
 

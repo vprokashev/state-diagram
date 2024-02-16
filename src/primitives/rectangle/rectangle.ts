@@ -1,10 +1,10 @@
-import { compileShader, createProgram } from '../gl';
-import { mat3, vec2, vec4 } from 'gl-matrix';
-import { FAILED_TO_CREATE_BUFFER } from '../errors';
-import { type BasePrimitive, isPrimitiveBaseProperties, type PrimitiveBaseProperties } from '../types';
-import vertexShaderSource from './common.vert';
-import fragmentShaderSource from './common.frag';
-import { setRectangleVertices } from '../math';
+import { compileShader, createProgram } from '../../graphical-tools/gl';
+import { vec2, vec4 } from 'gl-matrix';
+import { FAILED_TO_CREATE_BUFFER } from '../../errors';
+import { type BasePrimitive, isPrimitiveBaseProperties, type PrimitiveBaseProperties } from '../../types';
+import vertexShaderSource from './rectangle.vert';
+import fragmentShaderSource from './rectangle.frag';
+import { setRectangleVertices } from './lib';
 
 interface RectangleProps extends PrimitiveBaseProperties {
   color: vec4;
@@ -72,8 +72,16 @@ export class Rectangle implements BasePrimitive {
 
     this.gl.drawArrays(this.gl.TRIANGLES, 0, this.vertices.length / 2);
 
+    this.gl.disableVertexAttribArray(positionAttributeLocation);
+
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, null);
 
     this.gl.useProgram(null);
+  }
+
+  destroy(): void {
+    this.gl.deleteBuffer(this.#buffer);
+    this.gl.useProgram(null);
+    this.gl.deleteProgram(this.#program);
   }
 }

@@ -28,7 +28,3 @@ export function getFirstNode(scene: SceneNode, predicate: (arg: SceneNode) => bo
 
   return defaultValue;
 }
-
-export function getByCoordIntersection(scene: SceneNode, { x, y }: { x: number, y: number }) {
-
-}

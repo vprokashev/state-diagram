@@ -1,4 +1,4 @@
-import { type BasePrimitive, isPrimitiveBaseProperties, type PrimitiveBaseProperties, sceneDiscriminantType } from '../types';
+import { type BasePrimitive, isPrimitiveBaseProperties, type PrimitiveBaseProperties } from '../types';
 import { vec2 } from 'gl-matrix';
 
 interface SpaceProps extends PrimitiveBaseProperties {
