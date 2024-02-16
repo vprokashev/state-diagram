@@ -2,6 +2,7 @@ import { isSceneNode, SceneConfig, sceneDiscriminantType, SceneNode } from '../t
 import { Space, Rectangle } from '../primitives';
 import { INCORRECT_PROPERTIES_IN_CONFIG, PRIMITIVE_DOES_NOT_EXIST, UNREACHABLE_STATE } from '../errors';
 import { resizeCanvasToDisplaySize } from '../gl';
+import { vec2 } from 'gl-matrix';
 
 export class Scene {
   sceneNode: SceneNode;
@@ -54,14 +55,12 @@ export class Scene {
   };
 
   private draw = (node: SceneNode, parent?: SceneNode) => {
-    if (parent) {
-      node.instance.updateWorld(parent.instance.translation);
-    }
     if (node.children) {
       node.children.forEach((childNode) => this.draw(childNode, node));
     }
     if (node.instance.draw) {
-      node.instance.draw();
+      const { translation } = parent?.instance || { translation: vec2.fromValues(0, 0) }
+      node.instance.draw(translation);
     }
   };
 

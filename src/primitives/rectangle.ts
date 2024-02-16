@@ -49,7 +49,7 @@ export class Rectangle implements BasePrimitive {
       && props.color.length === 4;
   }
 
-  draw(): void {
+  draw(translation: vec2): void {
     this.gl.useProgram(this.#program);
 
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.#buffer);
@@ -67,16 +67,13 @@ export class Rectangle implements BasePrimitive {
     const uniformTranslation = this.gl.getUniformLocation(this.#program, 'u_translation');
     this.gl.uniform2f(uniformTranslation, this.translation[ 0 ], this.translation[ 1 ]);
 
-    this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
+    const uniformParentTranslation = this.gl.getUniformLocation(this.#program, 'u_parent_translation');
+    this.gl.uniform2f(uniformParentTranslation, translation[ 0 ], translation[ 1 ]);
+
+    this.gl.drawArrays(this.gl.TRIANGLES, 0, this.vertices.length / 2);
 
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, null);
 
     this.gl.useProgram(null);
-  }
-
-  updateWorld(parentTranslation?: vec2) {
-    if (parentTranslation) {
-      vec2.add(this.translation, parentTranslation, this.translation);
-    }
   }
 }

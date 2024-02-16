@@ -21,10 +21,4 @@ export class Space implements BasePrimitive {
   static runtimeCheckProperties(props: unknown): props is SpaceProps {
     return isPrimitiveBaseProperties(props);
   }
-
-  updateWorld(parentTranslation?: vec2) {
-    if (parentTranslation) {
-      vec2.add(this.translation, parentTranslation, this.translation);
-    }
-  }
 }

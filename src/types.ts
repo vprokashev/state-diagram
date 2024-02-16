@@ -4,8 +4,7 @@ export interface BasePrimitive {
   gl: WebGLRenderingContext;
   scale: vec2,
   translation: vec2,
-  draw?(): void
-  updateWorld(parentTranslation?: vec2): void;
+  draw?(translation: vec2): void
 }
 
 export interface PrimitiveBaseProperties {

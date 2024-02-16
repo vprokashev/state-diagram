@@ -21,17 +21,17 @@ const sceneConfig = {
         scale: vec2.fromValues(0.3, 0.3),
         translation: vec2.fromValues(-0.5, -0.5),
         color: vec4.fromValues(1, 0.5, 0.5, 1)
-      }/*,
+      },
       children: [
         {
           type: sceneDiscriminantType.rectangle,
           properties: {
-            local: mat3.fromScaling(mat3.create(), vec2.fromValues(0.2, 0.2)),
-            world: mat3.fromTranslation(mat3.create(), vec2.fromValues(0, 0)),
+            scale: vec2.fromValues(0.1, 0.1),
+            translation: vec2.fromValues(0.1, 0.1),
             color: vec4.fromValues(1, 1, 0, 1)
           }
         }
-      ]*/
+      ]
     }
   ]
 } satisfies SceneConfig;
