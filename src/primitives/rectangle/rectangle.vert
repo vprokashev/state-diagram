@@ -1,11 +1,8 @@
 #version 300 es
-in vec2 a_position;
-uniform vec2 u_translation;
-uniform vec2 u_parent_translation;
-uniform vec2 u_scale;
+in vec2 aPosition;
+uniform mat4 uWorld;
 
 void main() {
-    vec2 scaledPosition = a_position * u_scale;
-    vec2 translatedPosition = scaledPosition + u_parent_translation + u_translation;
-    gl_Position = vec4(translatedPosition, 0.0, 1.0);
+    vec4 position = vec4(aPosition, 0.0, 1.0);
+    gl_Position = uWorld * position;
 }

@@ -29,6 +29,11 @@ export class Scene {
   static createSceneNodeByConfig = (gl: WebGLRenderingContext, config: SceneConfig): SceneNode => {
     let node: Partial<SceneNode> = {};
 
+    node.type = config.type;
+    if (config.name) {
+      node.name = config.name;
+    }
+
     if (config.type === sceneDiscriminantType.space) {
       if (!Space.runtimeCheckProperties(config.properties)) {
         throw new Error(INCORRECT_PROPERTIES_IN_CONFIG);
@@ -55,23 +60,21 @@ export class Scene {
   };
 
   private draw = (node: SceneNode, parent?: SceneNode) => {
+    if (!parent) {
+      (node.instance as Space).draw();
+    } else {
+      const worldMatrix = parent?.instance?.worldMatrix;
+      if (worldMatrix) {
+        node.instance.draw(worldMatrix);
+      }
+    }
     if (node.children) {
       node.children.forEach((childNode) => this.draw(childNode, node));
-    }
-    if (node.instance.draw) {
-      const { translation } = parent?.instance || { translation: vec2.fromValues(0, 0) }
-      node.instance.draw(translation);
     }
   };
 
   #loop = () => {
-    resizeCanvasToDisplaySize(this.gl.canvas as HTMLCanvasElement);
-    this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
-    this.gl.enable(this.gl.CULL_FACE);
-    this.gl.enable(this.gl.DEPTH_TEST);
-    this.gl.clearColor(0.0, 0.0, 0.0, 1.0);
-    this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
     this.draw(this.sceneNode);
-    this.#loopId = requestAnimationFrame(this.#loop);
+    // this.#loopId = requestAnimationFrame(this.#loop);
   };
 }

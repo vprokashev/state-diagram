@@ -4,31 +4,53 @@ import { Scene } from './scene';
 import { SceneConfig, sceneDiscriminantType } from './types';
 import { getFirstNode } from './scene/tools';
 import { Rectangle } from './primitives';
-import { transformBufferVertices, pointIntersectShape } from './graphical-tools/math';
+import { pointIntersectShape } from './graphical-tools/math';
+
+// 33 ms per 1 frame - minimal
+// View Matrix - converted coords from world to camera
+// Projection Matrix - z and clipping (cutting off space)
+// * Aspect ratio
+// * Field of view
+// * Normalization
+// MVP Matrix = Projection Matrix × View Matrix × Model Matrix
+//
 
 const gl = initGL();
+const canvas = document.getElementById('canvas');
+if (!canvas) {
+  throw new Error("Canvas not found");
+}
 
 const sceneConfig = {
   type: sceneDiscriminantType.space,
   properties: {
-    scale: vec2.create(),
-    translation: vec2.create()
+    x: 0,
+    y: 0,
+    width: 640,
+    height: 480,
+    color: vec4.fromValues(.0, .0, .0, 1.0)
   },
   children: [
     {
+      name: 'rec1',
       type: sceneDiscriminantType.rectangle,
       properties: {
-        scale: vec2.fromValues(0.3, 0.3),
-        translation: vec2.fromValues(-0.5, -0.5),
+        x: 160,
+        y: 120,
+        width: 320,
+        height: 240,
         color: vec4.fromValues(1, 0.5, 0.5, 1)
       },
       children: [
         {
+          name: 'rec2',
           type: sceneDiscriminantType.rectangle,
           properties: {
-            scale: vec2.fromValues(0.1, 0.1),
-            translation: vec2.fromValues(0.1, 0.1),
-            color: vec4.fromValues(1, 1, 0, 1)
+            x: 100,
+            y: 20,
+            width: 320,
+            height: 240,
+            color: vec4.fromValues(0.5, 0.5, 0.5, 1)
           }
         }
       ]
@@ -42,43 +64,33 @@ scene.start();
 const rectangle = getFirstNode(scene.sceneNode, (node) => node.instance instanceof Rectangle);
 
 document.addEventListener('keydown', (e: KeyboardEvent) => {
+  // if (rectangle) {
+  //   if (e.key === 'ArrowLeft') {
+  //     vec2.add(rectangle.instance.translation, vec2.fromValues(-0.01, 0), rectangle.instance.translation);
+  //   } else if (e.key === 'ArrowRight') {
+  //     vec2.add(rectangle.instance.translation, vec2.fromValues(0.01, 0), rectangle.instance.translation);
+  //   } else if (e.key === 'ArrowUp') {
+  //     vec2.add(rectangle.instance.translation, vec2.fromValues(0, 0.01), rectangle.instance.translation);
+  //   } else if (e.key === 'ArrowDown') {
+  //     vec2.add(rectangle.instance.translation, vec2.fromValues(0, -0.01), rectangle.instance.translation);
+  //   }
+  // }
+});
+
+
+const { x, y, width, height } = canvas.getBoundingClientRect();
+canvas.addEventListener('mousemove', (e: MouseEvent) => {
   if (rectangle) {
-    if (e.key === 'ArrowLeft') {
-      vec2.add(rectangle.instance.translation, vec2.fromValues(-0.01, 0), rectangle.instance.translation);
-    } else if (e.key === 'ArrowRight') {
-      vec2.add(rectangle.instance.translation, vec2.fromValues(0.01, 0), rectangle.instance.translation);
-    } else if (e.key === 'ArrowUp') {
-      vec2.add(rectangle.instance.translation, vec2.fromValues(0, 0.01), rectangle.instance.translation);
-    } else if (e.key === 'ArrowDown') {
-      vec2.add(rectangle.instance.translation, vec2.fromValues(0, -0.01), rectangle.instance.translation);
+    const vertices = (rectangle.instance as Rectangle).vertices;
+
+    if (pointIntersectShape(
+      vec2.fromValues(e.clientX - x, e.clientY - y),
+      vertices,
+      vec2.fromValues(width, height)
+    )) {
+      (rectangle.instance as Rectangle).color = vec4.fromValues(0.5, 1, 0.5, 1);
+    } else {
+      (rectangle.instance as Rectangle).color = vec4.fromValues(1, 0.5, 0.5, 1);
     }
   }
 });
-
-const canvas = document.getElementById('canvas');
-if (canvas) {
-  const { x, y, width, height } = canvas.getBoundingClientRect();
-  canvas.addEventListener('mousemove', (e: MouseEvent) => {
-    if (rectangle) {
-      const vertices = (rectangle.instance as Rectangle).vertices;
-      const transformedVertices = new Float32Array(vertices.length);
-
-      transformBufferVertices(
-        transformedVertices,
-        vertices,
-        rectangle.instance.translation,
-        rectangle.instance.scale
-      );
-
-      if (pointIntersectShape(
-        vec2.fromValues(e.clientX - x, e.clientY - y),
-        transformedVertices,
-        vec2.fromValues(width, height)
-      )) {
-        (rectangle.instance as Rectangle).color = vec4.fromValues(0.5, 1, 0.5, 1);
-      } else {
-        (rectangle.instance as Rectangle).color = vec4.fromValues(1, 0.5, 0.5, 1);
-      }
-    }
-  });
-}

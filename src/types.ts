@@ -1,26 +1,22 @@
-import { type mat3, type vec2 } from 'gl-matrix';
+import {type mat4, vec4} from 'gl-matrix';
+import {Space} from "./primitives";
 
 export interface BasePrimitive {
   gl: WebGLRenderingContext;
-  scale: vec2,
-  translation: vec2,
-  draw?(translation: vec2): void
+  color: vec4,
+  globalMatrix: mat4; // relative to viewport
+  worldMatrix: mat4; // relative to outer coordinate system (for ex. gap between 2 elements)
+  localMatrix: mat4; // relative to self coordinate system (for ex. shift of the center)
+  draw(parentWorldMatrix: mat4): void
+  calculateGlobalMatrix?(parentWorldMatrix: mat4): void
 }
 
 export interface PrimitiveBaseProperties {
-  scale: vec2;
-  translation: vec2;
-}
-
-export function isPrimitiveBaseProperties(props: unknown): props is PrimitiveBaseProperties {
-  return !!props
-    && typeof props === 'object'
-    && 'scale' in props
-    && 'translation' in props
-    && props.scale instanceof Float32Array
-    && props.scale.length === 2
-    && props.translation instanceof Float32Array
-    && props.translation.length === 2;
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  color: [number, number, number, number] | Float32Array
 }
 
 export const sceneDiscriminantType = {
@@ -29,13 +25,16 @@ export const sceneDiscriminantType = {
 } as const;
 
 export interface SceneConfig {
+  name?: string,
   type: keyof typeof sceneDiscriminantType,
-  properties: unknown,
+  properties: PrimitiveBaseProperties,
   children?: readonly SceneConfig[] | undefined | null
 }
 
 export interface SceneNode {
-  instance: BasePrimitive,
+  name: string,
+  type: keyof typeof sceneDiscriminantType,
+  instance: BasePrimitive | Space,
   children?: SceneNode[] | null | undefined
 }
 

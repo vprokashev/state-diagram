@@ -1,24 +1,33 @@
-import { type BasePrimitive, isPrimitiveBaseProperties, type PrimitiveBaseProperties } from '../types';
-import { vec2 } from 'gl-matrix';
+import { type PrimitiveBaseProperties } from '../types';
+import {mat4, vec4} from 'gl-matrix';
+import {resizeCanvasToDisplaySize} from "../graphical-tools/gl";
 
 interface SpaceProps extends PrimitiveBaseProperties {
 }
 
-export class Space implements BasePrimitive {
+export class Space {
   gl: WebGLRenderingContext;
-  scale: vec2;
-  translation: vec2;
+  color: vec4;
+  worldMatrix: mat4 = mat4.create();
 
   constructor(
     gl: WebGLRenderingContext,
-    { scale, translation }: SpaceProps
+    { color }: SpaceProps
   ) {
     this.gl = gl;
-    this.scale = scale;
-    this.translation = translation;
+    this.color  = color;
   }
 
   static runtimeCheckProperties(props: unknown): props is SpaceProps {
-    return isPrimitiveBaseProperties(props);
+    return true;
+  }
+
+  draw() {
+    resizeCanvasToDisplaySize(this.gl.canvas as HTMLCanvasElement);
+    this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
+    this.gl.enable(this.gl.CULL_FACE);
+    this.gl.enable(this.gl.DEPTH_TEST);
+    this.gl.clearColor(...this.color as [number, number, number, number]);
+    this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
   }
 }

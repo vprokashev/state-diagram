@@ -58,11 +58,11 @@ export function resizeCanvasToDisplaySize(canvas: HTMLCanvasElement, multiplier:
   }
 }
 
-export function bindUniforms<N extends Record<string, string>>(
+export function bindUniforms<UVariable extends Record<string, WebGLUniformLocation>>(
   gl: WebGLRenderingContext,
   program: WebGLProgram,
-  dictionary: N
-): Record<keyof N, WebGLUniformLocation> {
+  dictionary: Record<keyof UVariable, string>
+): UVariable {
   const uniformCountInShader = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
   const namesInShader = [];
   for (let index = 0; index < uniformCountInShader; index++) {
@@ -87,5 +87,5 @@ export function bindUniforms<N extends Record<string, string>>(
     }
     result[ currentName ] = location
   }
-  return result as Record<keyof N, WebGLUniformLocation>;
+  return result as UVariable;
 }

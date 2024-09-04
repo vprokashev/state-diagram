@@ -1,18 +1,33 @@
-import { vec2 } from 'gl-matrix';
+import {mat4, vec2} from 'gl-matrix';
 
-export function transformBufferVertices(
-  outVertices: Float32Array,
-  bufferVertices: Float32Array,
-  translation: vec2,
-  scale: vec2
-): void {
-  for (let index = 0; index < bufferVertices.length; index += 2) {
-    const vertexPoint = vec2.fromValues(bufferVertices[ index ], bufferVertices[ index + 1 ]);
-    vec2.set(vertexPoint, vertexPoint[ 0 ] * scale[ 0 ], vertexPoint[ 1 ] * scale[ 1 ]);
-    vec2.add(vertexPoint, vertexPoint, translation);
-    outVertices[ index ] = vertexPoint[ 0 ];
-    outVertices[ index + 1 ] = vertexPoint[ 1 ];
-  }
+/**
+ *  Moves the coordinate space from the lower leftmost point
+ *  to the center of the screen, in accordance with the OpenGL standard.
+ *         x: (160 / canvas.clientWidth) * 2 - 1, // canvas.clientWidth = 640
+ *         y: (120 / canvas.clientHeight) * 2 - 1, // canvas.clientHeight = 480
+ *         width: (320 / canvas.clientWidth) * 2,
+ *         height: (240 / canvas.clientHeight) * 2
+ */
+export function viewportCoordinatesToOpenGLStandard(
+  out: mat4,
+  original: mat4,
+  canvasWidth: number,
+  canvasHeight: number
+) {
+
+}
+
+/**
+ * Inverted function for the viewportCoordinatesToOpenGLStandard
+ * convert from -1, 1 to viewport size
+ */
+export function coordsByOpenGLStandardToViewport(
+  out: mat4,
+  normalized: mat4,
+  canvasWidth: number,
+  canvasHeight: number
+) {
+
 }
 
 export function normalizeCanvasCoordinates(outPoint: vec2, point: vec2, canvasSize: vec2) {
