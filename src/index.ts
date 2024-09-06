@@ -1,3 +1,4 @@
+import './extension.js';
 import { initGL } from './graphical-tools/gl';
 import { vec2, vec4 } from 'gl-matrix';
 import { Scene } from './scene';
@@ -12,8 +13,13 @@ import { pointIntersectShape } from './graphical-tools/math';
 // * Aspect ratio
 // * Field of view
 // * Normalization
+// https://learnopengl.com/Getting-started/Coordinate-Systems
 // MVP Matrix = Projection Matrix × View Matrix × Model Matrix
-//
+// Order:
+//     var matrix = m3.identity();
+//     matrix = m3.multiply(matrix, translationMatrix);
+//     matrix = m3.multiply(matrix, rotationMatrix);
+//     matrix = m3.multiply(matrix, scaleMatrix);
 
 const gl = initGL();
 const canvas = document.getElementById('canvas');

@@ -4,8 +4,7 @@ import { FAILED_TO_CREATE_BUFFER } from '../../errors';
 import { type BasePrimitive, type PrimitiveBaseProperties } from '../../types';
 import vertexShaderSource from './rectangle.vert';
 import fragmentShaderSource from './rectangle.frag';
-import { setRectangleVertices } from './lib';
-import {viewportCoordinatesToOpenGLStandard} from "../../graphical-tools/math";
+import { getRectangleVertices } from './lib';
 
 type UniformVariable = Record<'color' | 'worldMatrix', WebGLUniformLocation>;
 
@@ -24,28 +23,15 @@ export class Rectangle implements BasePrimitive {
   #buffer!: WebGLBuffer | null;
   #uniformLocation: UniformVariable;
 
-  constructor(gl: WebGLRenderingContext, { x, y, width, height, color }: RectangleProps) {
+  constructor(gl: WebGLRenderingContext, props: RectangleProps) {
     this.gl = gl;
-    this.color = color;
+    this.color = props.color;
     this.globalMatrix = mat4.create();
 
-    const glX = (x / 640) * 2 - 1;
-    const glY = (y / 480) * 2 - 1;
-    const glWidth = (width / 640) * 2;
-    const glHeight = (height / 480) * 2;
-
-    this.worldMatrix = [
-      1, 0, glX, 0,
-      0, 1, glY, 0,
-      0, 0, 1, 0,
-      0, 0, 0, 1
-    ];
-    this.localMatrix = [
-      glWidth, 0, 0, 0,
-      0, glHeight, 0, 0,
-      0, 0, 1, 0,
-      0, 0, 0, 1
-    ];
+    this.worldMatrix = mat4.create();
+    mat4.translate(this.worldMatrix, this.worldMatrix, [ props.x, props.y, 0 ]);
+    mat4.scale(this.worldMatrix, this.worldMatrix, [ props.width, props.height, 0 ]);
+    this.localMatrix = mat4.create();
 
     const vertexShader = compileShader(this.gl, vertexShaderSource, this.gl.VERTEX_SHADER);
     const fragmentShader = compileShader(this.gl, fragmentShaderSource, this.gl.FRAGMENT_SHADER);
@@ -67,12 +53,8 @@ export class Rectangle implements BasePrimitive {
       throw new Error(FAILED_TO_CREATE_BUFFER);
     }
     gl.bindBuffer(gl.ARRAY_BUFFER, this.#buffer);
-    this.vertices = setRectangleVertices(
-      this.worldMatrix[ 2 ],
-      this.worldMatrix[ 6 ],
-      this.worldMatrix[ 0 ],
-      this.worldMatrix[ 5 ]
-    );
+    this.vertices = getRectangleVertices();
+    window.mLog(this.vertices, 2);
     this.gl.bufferData(this.gl.ARRAY_BUFFER, this.vertices, this.gl.STATIC_DRAW);
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
   }
@@ -82,17 +64,21 @@ export class Rectangle implements BasePrimitive {
   }
 
   draw(parentWorldMatrix: mat4): void {
+    this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
+
     this.gl.useProgram(this.#program);
     this.gl.uniform4fv(this.#uniformLocation.color, this.color);
-    //todo: order
-    // this.globalMatrix = mat4.multiply(this.globalMatrix, this.worldMatrix, this.localMatrix);
-    // console.log(this.globalMatrix);
-    mat4.multiply(this.globalMatrix, this.localMatrix, parentWorldMatrix);
-    mat4.multiply(this.globalMatrix, this.globalMatrix, this.worldMatrix);
-    console.log(this.globalMatrix);
 
+    const normalization = new Float32Array([
+      2 / 640, 0, 0, 0,
+      0, 2 / 480, 0, 0,
+      0, 0, 1, 0,
+      -1, -1, 0, 1
+    ]);
 
-    this.gl.uniformMatrix4fv(this.#uniformLocation.worldMatrix, true, this.globalMatrix);
+    mat4.multiply(this.worldMatrix, normalization, this.worldMatrix);
+
+    this.gl.uniformMatrix4fv(this.#uniformLocation.worldMatrix, false, this.worldMatrix);
 
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.#buffer);
     const positionAttributeLocation = this.gl.getAttribLocation(this.#program, 'aPosition');

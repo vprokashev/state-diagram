@@ -1,8 +1,8 @@
-export function setRectangleVertices(x: number, y: number, width: number, height: number) {
-  const x1 = x;
-  const x2 = x + width;
-  const y1 = y;
-  const y2 = y + height;
+export function getRectangleVertices() {
+  const x1 = 0;
+  const x2 = 1;
+  const y1 = 0;
+  const y2 = 1;
 
   return new Float32Array([
     x1, y1,
