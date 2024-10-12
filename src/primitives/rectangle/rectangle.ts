@@ -1,20 +1,20 @@
 import { bindUniforms, compileShader, createProgram } from '../../graphical-tools/gl';
-import {mat4, vec4} from 'gl-matrix';
+import { mat4, vec4 } from 'gl-matrix';
 import { FAILED_TO_CREATE_BUFFER } from '../../errors';
 import { type BasePrimitive, type PrimitiveBaseProperties } from '../../types';
 import vertexShaderSource from './rectangle.vert';
 import fragmentShaderSource from './rectangle.frag';
 import { getRectangleVertices } from './lib';
+import { Camera } from '../../camera/types';
 
-type UniformVariable = Record<'color' | 'worldMatrix', WebGLUniformLocation>;
+type UniformVariable = Record<'color' | 'scale' | 'position' | 'camera', WebGLUniformLocation>;
 
 interface RectangleProps extends PrimitiveBaseProperties {
 }
 
 export class Rectangle implements BasePrimitive {
-  localMatrix: mat4;
-  worldMatrix: mat4;
-  globalMatrix: mat4;
+  scale: [ number, number ];
+  position: [ number, number ];
   color: vec4;
   vertices!: Float32Array;
 
@@ -26,12 +26,8 @@ export class Rectangle implements BasePrimitive {
   constructor(gl: WebGLRenderingContext, props: RectangleProps) {
     this.gl = gl;
     this.color = props.color;
-    this.globalMatrix = mat4.create();
-
-    this.worldMatrix = mat4.create();
-    mat4.translate(this.worldMatrix, this.worldMatrix, [ props.x, props.y, 0 ]);
-    mat4.scale(this.worldMatrix, this.worldMatrix, [ props.width, props.height, 0 ]);
-    this.localMatrix = mat4.create();
+    this.scale = props.scale;
+    this.position = props.position;
 
     const vertexShader = compileShader(this.gl, vertexShaderSource, this.gl.VERTEX_SHADER);
     const fragmentShader = compileShader(this.gl, fragmentShaderSource, this.gl.FRAGMENT_SHADER);
@@ -41,10 +37,27 @@ export class Rectangle implements BasePrimitive {
       this.#program,
       {
         color: 'uColor',
-        worldMatrix: 'uWorld'
+        scale: 'uScale',
+        position: 'uPosition',
+        camera: 'uCamera'
       }
     );
     this.initBuffer(gl);
+  }
+
+  // todo
+  get NDCScale() {
+    return [
+      this.scale[ 0 ],
+      this.scale[ 1 ]
+    ]
+  }
+  // todo
+  get NDCPosition() {
+    return [
+      this.position[ 0 ],
+      this.position[ 1 ]
+    ]
   }
 
   private initBuffer(gl: WebGLRenderingContext) {
@@ -54,7 +67,6 @@ export class Rectangle implements BasePrimitive {
     }
     gl.bindBuffer(gl.ARRAY_BUFFER, this.#buffer);
     this.vertices = getRectangleVertices();
-    window.mLog(this.vertices, 2);
     this.gl.bufferData(this.gl.ARRAY_BUFFER, this.vertices, this.gl.STATIC_DRAW);
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
   }
@@ -63,27 +75,16 @@ export class Rectangle implements BasePrimitive {
     return true;
   }
 
-  draw(parentWorldMatrix: mat4): void {
-    this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
-
+  draw(origin: [number, number], camera: Camera): void {
     this.gl.useProgram(this.#program);
     this.gl.uniform4fv(this.#uniformLocation.color, this.color);
 
-    const normalization = new Float32Array([
-      2 / 640, 0, 0, 0,
-      0, 2 / 480, 0, 0,
-      0, 0, 1, 0,
-      -1, -1, 0, 1
-    ]);
-
-    mat4.multiply(this.globalMatrix, normalization, parentWorldMatrix);
-    mat4.multiply(this.globalMatrix, parentWorldMatrix, this.globalMatrix);
-    mat4.multiply(this.globalMatrix, normalization, this.globalMatrix);
-window.mLog(this.globalMatrix);
-    this.gl.uniformMatrix4fv(this.#uniformLocation.worldMatrix, false, this.globalMatrix);
+    this.gl.uniform2fv(this.#uniformLocation.scale, this.scale);
+    this.gl.uniform2fv(this.#uniformLocation.position, [ origin[0] + this.position[ 0 ], origin[ 1 ] + this.position[ 1 ]]);
+    this.gl.uniformMatrix4fv(this.#uniformLocation.camera, false, mat4.create());
 
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.#buffer);
-    const positionAttributeLocation = this.gl.getAttribLocation(this.#program, 'aPosition');
+    const positionAttributeLocation = this.gl.getAttribLocation(this.#program, 'aNDCPosition');
     this.gl.vertexAttribPointer(positionAttributeLocation, 2, this.gl.FLOAT, false, 0, 0);
     this.gl.enableVertexAttribArray(positionAttributeLocation);
 

@@ -6,6 +6,7 @@ import { SceneConfig, sceneDiscriminantType } from './types';
 import { getFirstNode } from './scene/tools';
 import { Rectangle } from './primitives';
 import { pointIntersectShape } from './graphical-tools/math';
+import { Simple2D } from "./camera/simple2D";
 
 // 33 ms per 1 frame - minimal
 // View Matrix - converted coords from world to camera
@@ -27,36 +28,32 @@ if (!canvas) {
   throw new Error("Canvas not found");
 }
 
+const resolution = { w: 640, h: 480 };
+
 const sceneConfig = {
   type: sceneDiscriminantType.space,
   properties: {
-    x: 0,
-    y: 0,
-    width: 640,
-    height: 480,
-    color: vec4.fromValues(.0, .0, .0, 1.0)
+    width: resolution.w,
+    height: resolution.h,
+    color: [ 0, 0, 0, 1 ]
   },
   children: [
     {
       name: 'rec1',
       type: sceneDiscriminantType.rectangle,
       properties: {
-        x: 320,
-        y: 240,
-        width: 160,
-        height: 120,
-        color: vec4.fromValues(1, 0.5, 0.5, 1)
+        position: [ 320, 240 ],
+        scale: [ 318, 120 ],
+        color: [ 1, 0.5, 0.5, 1 ]
       },
       children: [
         {
           name: 'rec2',
           type: sceneDiscriminantType.rectangle,
           properties: {
-            x: 100,
-            y: 20,
-            width: 320,
-            height: 240,
-            color: vec4.fromValues(0.5, 0.5, 0.5, 1)
+            position: [ 100, 20 ],
+            scale: [ 30, 30 ],
+            color: [ 0.5, 0.5, 0.5, 1 ]
           }
         }
       ]
@@ -64,39 +61,56 @@ const sceneConfig = {
   ]
 } satisfies SceneConfig;
 
-const scene = new Scene(gl, sceneConfig);
+const camera = new Simple2D(resolution.w, resolution.h);
+
+const scene = new Scene(gl, sceneConfig, camera);
 scene.start();
 
-const rectangle = getFirstNode(scene.sceneNode, (node) => node.instance instanceof Rectangle);
+const rectangle1 = getFirstNode(scene.sceneNode, (node) => node.name === 'rec1');
+const rectangle2 = getFirstNode(scene.sceneNode, (node) => node.name === 'rec2');
 
 document.addEventListener('keydown', (e: KeyboardEvent) => {
-  // if (rectangle) {
-  //   if (e.key === 'ArrowLeft') {
-  //     vec2.add(rectangle.instance.translation, vec2.fromValues(-0.01, 0), rectangle.instance.translation);
-  //   } else if (e.key === 'ArrowRight') {
-  //     vec2.add(rectangle.instance.translation, vec2.fromValues(0.01, 0), rectangle.instance.translation);
-  //   } else if (e.key === 'ArrowUp') {
-  //     vec2.add(rectangle.instance.translation, vec2.fromValues(0, 0.01), rectangle.instance.translation);
-  //   } else if (e.key === 'ArrowDown') {
-  //     vec2.add(rectangle.instance.translation, vec2.fromValues(0, -0.01), rectangle.instance.translation);
-  //   }
-  // }
+  if (rectangle1 && 'position' in rectangle1.instance) {
+    if (e.key === 'ArrowLeft') {
+      vec2.add(rectangle1.instance.position, vec2.fromValues(-2, 0), rectangle1.instance.position);
+    } else if (e.key === 'ArrowRight') {
+      vec2.add(rectangle1.instance.position, vec2.fromValues(2, 0), rectangle1.instance.position);
+    } else if (e.key === 'ArrowUp') {
+      vec2.add(rectangle1.instance.position, vec2.fromValues(0, 2), rectangle1.instance.position);
+    } else if (e.key === 'ArrowDown') {
+      vec2.add(rectangle1.instance.position, vec2.fromValues(0, -2), rectangle1.instance.position);
+    }
+  }
+});
+
+document.addEventListener('keydown', (e: KeyboardEvent) => {
+  if (rectangle2 && 'position' in rectangle2.instance) {
+    if (e.key === 'ArrowLeft') {
+      vec2.add(rectangle2.instance.position, vec2.fromValues(-2, 0), rectangle2.instance.position);
+    } else if (e.key === 'ArrowRight') {
+      vec2.add(rectangle2.instance.position, vec2.fromValues(2, 0), rectangle2.instance.position);
+    } else if (e.key === 'ArrowUp') {
+      vec2.add(rectangle2.instance.position, vec2.fromValues(0, 2), rectangle2.instance.position);
+    } else if (e.key === 'ArrowDown') {
+      vec2.add(rectangle2.instance.position, vec2.fromValues(0, -2), rectangle2.instance.position);
+    }
+  }
 });
 
 
 const { x, y, width, height } = canvas.getBoundingClientRect();
 canvas.addEventListener('mousemove', (e: MouseEvent) => {
-  if (rectangle) {
-    const vertices = (rectangle.instance as Rectangle).vertices;
+  if (rectangle1) {
+    const vertices = (rectangle1.instance as Rectangle).vertices;
 
     if (pointIntersectShape(
       vec2.fromValues(e.clientX - x, e.clientY - y),
       vertices,
       vec2.fromValues(width, height)
     )) {
-      (rectangle.instance as Rectangle).color = vec4.fromValues(0.5, 1, 0.5, 1);
+      (rectangle1.instance as Rectangle).color = vec4.fromValues(0.5, 1, 0.5, 1);
     } else {
-      (rectangle.instance as Rectangle).color = vec4.fromValues(1, 0.5, 0.5, 1);
+      (rectangle1.instance as Rectangle).color = vec4.fromValues(1, 0.5, 0.5, 1);
     }
   }
 });

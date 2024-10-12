@@ -74,7 +74,8 @@ export function bindUniforms<UVariable extends Record<string, WebGLUniformLocati
   const match = namesInShader.every((uniformName) => glNames.indexOf(uniformName) > -1);
 
   if (uniformCountInShader !== glNames.length || !match) {
-    throw new Error(`${ UNIFORM_VARIABLE_MISMATCH }\nIn the shader: ${ namesInShader.join(', ') }\nPassed: ${ glNames.join(', ') }`);
+    // todo: 2 warns
+    //throw new Error(`${ UNIFORM_VARIABLE_MISMATCH }\nIn the shader: ${ namesInShader.join(', ') }\nPassed: ${ glNames.join(', ') }`);
   }
 
   const result:Record<string, WebGLUniformLocation> = {};
@@ -82,10 +83,9 @@ export function bindUniforms<UVariable extends Record<string, WebGLUniformLocati
   for (let index = 0; index < dictionaryNames.length; index++) {
     const currentName = dictionaryNames[ index ];
     const location = gl.getUniformLocation(program, dictionary[ currentName ]);
-    if (!location) {
-      throw new Error(UNREACHABLE_STATE);
+    if (location) {
+      result[ currentName ] = location
     }
-    result[ currentName ] = location
   }
   return result as UVariable;
 }

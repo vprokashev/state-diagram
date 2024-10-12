@@ -1,33 +1,31 @@
-import { type PrimitiveBaseProperties } from '../types';
-import {mat4, vec4} from 'gl-matrix';
-import {resizeCanvasToDisplaySize} from "../graphical-tools/gl";
+import { Color, type SpaceProperties } from '../types';
 
-interface SpaceProps extends PrimitiveBaseProperties {
-}
-
-export class Space {
-  gl: WebGLRenderingContext;
-  color: vec4;
-  worldMatrix: mat4 = mat4.create();
+export class Space implements SpaceProperties {
+  public width: number
+  public height: number
+  public color: Color
 
   constructor(
-    gl: WebGLRenderingContext,
-    { color }: SpaceProps
+    public gl: WebGLRenderingContext,
+    spaceProps: SpaceProperties
   ) {
-    this.gl = gl;
-    this.color  = color;
+    this.width = spaceProps.width;
+    this.height = spaceProps.height;
+    this.color = spaceProps.color;
   }
 
-  static runtimeCheckProperties(props: unknown): props is SpaceProps {
+  static runtimeCheckProperties(props: unknown): props is SpaceProperties {
     return true;
   }
 
   draw() {
-    resizeCanvasToDisplaySize(this.gl.canvas as HTMLCanvasElement);
+    this.gl.canvas.width = this.width;
+    this.gl.canvas.height = this.height;
+    // resizeCanvasToDisplaySize(this.gl.canvas as HTMLCanvasElement);
     this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
     this.gl.enable(this.gl.CULL_FACE);
-    this.gl.enable(this.gl.DEPTH_TEST);
-    this.gl.clearColor(...this.color as [number, number, number, number]);
+    this.gl.disable(this.gl.DEPTH_TEST);
+    this.gl.clearColor(...this.color);
     this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
   }
 }

@@ -1,36 +1,18 @@
 import { isSceneNode, SceneConfig, sceneDiscriminantType, SceneNode } from '../types';
 import { Space, Rectangle } from '../primitives';
 import { INCORRECT_PROPERTIES_IN_CONFIG, PRIMITIVE_DOES_NOT_EXIST, UNREACHABLE_STATE } from '../errors';
-import { resizeCanvasToDisplaySize } from '../graphical-tools/gl';
-import { vec2, mat4 } from 'gl-matrix';
+import { Camera } from '../camera/types';
 
 export class Scene {
   sceneNode: SceneNode;
   #loopId: number | null = null;
-  viewProjectionMatrix: mat4;
 
   constructor(
-    private gl: WebGLRenderingContext,
-    sceneConfig: SceneConfig
+    public gl: WebGLRenderingContext,
+    public sceneConfig: SceneConfig,
+    public camera: Camera
   ) {
     this.sceneNode = Scene.createSceneNodeByConfig(gl, sceneConfig);
-
-    //camera
-    let cameraAngleRadians = 0;
-    let fieldOfViewRadians = 1.0472; // 60 degree
-    let cameraHeight = 50;
-    let aspect = 640 / 480;
-    let projectionMatrix = mat4.create();
-    mat4.perspective(projectionMatrix, fieldOfViewRadians, aspect, 1, 2000);
-    let cameraPosition = [0, -200, 0] as const;
-    let target = [0, 0, 0] as const;
-    let up = [0, 0, 1] as const;
-    let cameraMatrix = mat4.create();
-    mat4.lookAt(cameraMatrix, cameraPosition, target, up);
-    let viewMatrix = mat4.create();
-    mat4.invert(viewMatrix, cameraMatrix);
-    this.viewProjectionMatrix = mat4.create();
-    mat4.multiply(this.viewProjectionMatrix, projectionMatrix, viewMatrix);
   }
 
   public start() {
@@ -78,13 +60,12 @@ export class Scene {
   };
 
   private draw = (node: SceneNode, parent?: SceneNode) => {
-    if (!parent) {
-      (node.instance as Space).draw();
+    if (node.instance instanceof Space) {
+      node.instance.draw();
+    } else if (parent && 'position' in parent.instance) {
+      node.instance.draw(parent.instance.position, this.camera);
     } else {
-      const worldMatrix = parent?.instance?.worldMatrix;
-      if (worldMatrix) {
-        node.instance.draw(worldMatrix);
-      }
+      node.instance.draw([ 0, 0 ], this.camera)
     }
     if (node.children) {
       node.children.forEach((childNode) => this.draw(childNode, node));
@@ -93,6 +74,6 @@ export class Scene {
 
   #loop = () => {
     this.draw(this.sceneNode);
-    //this.#loopId = requestAnimationFrame(this.#loop);
+    this.#loopId = requestAnimationFrame(this.#loop);
   };
 }
