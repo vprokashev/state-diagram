@@ -76,9 +76,11 @@ export class Rectangle implements BasePrimitive {
       -1, -1, 0, 1
     ]);
 
-    mat4.multiply(this.worldMatrix, normalization, this.worldMatrix);
-
-    this.gl.uniformMatrix4fv(this.#uniformLocation.worldMatrix, false, this.worldMatrix);
+    mat4.multiply(this.globalMatrix, normalization, parentWorldMatrix);
+    mat4.multiply(this.globalMatrix, parentWorldMatrix, this.globalMatrix);
+    mat4.multiply(this.globalMatrix, normalization, this.globalMatrix);
+window.mLog(this.globalMatrix);
+    this.gl.uniformMatrix4fv(this.#uniformLocation.worldMatrix, false, this.globalMatrix);
 
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.#buffer);
     const positionAttributeLocation = this.gl.getAttribLocation(this.#program, 'aPosition');

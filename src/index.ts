@@ -41,10 +41,10 @@ const sceneConfig = {
       name: 'rec1',
       type: sceneDiscriminantType.rectangle,
       properties: {
-        x: 160,
-        y: 120,
-        width: 320,
-        height: 240,
+        x: 320,
+        y: 240,
+        width: 160,
+        height: 120,
         color: vec4.fromValues(1, 0.5, 0.5, 1)
       },
       children: [

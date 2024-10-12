@@ -28,7 +28,10 @@ export interface SceneConfig {
   name?: string,
   type: keyof typeof sceneDiscriminantType,
   properties: PrimitiveBaseProperties,
-  children?: readonly SceneConfig[] | undefined | null
+  children?: readonly SceneConfig[] | undefined | null,
+  actions?: {
+    [name: string]: (ts: number) => void
+  }
 }
 
 export interface SceneNode {

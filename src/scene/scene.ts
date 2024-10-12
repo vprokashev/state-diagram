@@ -83,9 +83,7 @@ export class Scene {
     } else {
       const worldMatrix = parent?.instance?.worldMatrix;
       if (worldMatrix) {
-        const w = mat4.create();
-        mat4.multiply(w, this.viewProjectionMatrix, worldMatrix);
-        node.instance.draw(w);
+        node.instance.draw(worldMatrix);
       }
     }
     if (node.children) {
