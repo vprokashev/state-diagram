@@ -7,7 +7,7 @@ import fragmentShaderSource from './rectangle.frag';
 import { getRectangleVertices } from './lib';
 import { Camera } from '../../camera/types';
 
-type UniformVariable = Record<'color' | 'scale' | 'position' | 'camera', WebGLUniformLocation>;
+type UniformVariable = Record<'color' | 'projection', WebGLUniformLocation>;
 
 interface RectangleProps extends PrimitiveBaseProperties {
 }
@@ -37,27 +37,41 @@ export class Rectangle implements BasePrimitive {
       this.#program,
       {
         color: 'uColor',
-        scale: 'uScale',
-        position: 'uPosition',
-        camera: 'uCamera'
+        projection: 'uProjection'
       }
     );
     this.initBuffer(gl);
   }
 
-  // todo
-  get NDCScale() {
-    return [
-      this.scale[ 0 ],
-      this.scale[ 1 ]
-    ]
-  }
-  // todo
-  get NDCPosition() {
-    return [
-      this.position[ 0 ],
-      this.position[ 1 ]
-    ]
+  get projection() {
+    const x = this.position[ 0 ];
+    const y = this.position[ 1 ];
+    const width = this.scale[ 0 ];
+    const height = this.scale[ 1 ];
+
+    const projectionMatrix = new Float32Array([
+      1 / 640 * 2, 0,           0, 0,
+      0,           1 / 480 * 2, 0, 0,
+      0,           0,           1, 0,
+      -1,          -1,          0, 1
+    ]);
+
+    /**
+     * sx 0  0  0
+     * 0  sy 0  0
+     * 0  0  sz 0
+     * tx ty tz 1
+     */
+    const transformationView = new Float32Array([
+      width, 0, 0, 0,
+      0, height, 0, 0,
+      0, 0, 1, 0,
+      x, y, 0, 1
+    ]);
+
+    const finalNDCMatrix = mat4.create();
+    mat4.multiply(finalNDCMatrix, projectionMatrix, transformationView);
+    return finalNDCMatrix;
   }
 
   private initBuffer(gl: WebGLRenderingContext) {
@@ -78,10 +92,8 @@ export class Rectangle implements BasePrimitive {
   draw(origin: [number, number], camera: Camera): void {
     this.gl.useProgram(this.#program);
     this.gl.uniform4fv(this.#uniformLocation.color, this.color);
-
-    this.gl.uniform2fv(this.#uniformLocation.scale, this.scale);
-    this.gl.uniform2fv(this.#uniformLocation.position, [ origin[0] + this.position[ 0 ], origin[ 1 ] + this.position[ 1 ]]);
-    this.gl.uniformMatrix4fv(this.#uniformLocation.camera, false, mat4.create());
+window.mLog(this.projection);
+    this.gl.uniformMatrix4fv(this.#uniformLocation.projection, false, this.projection);
 
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.#buffer);
     const positionAttributeLocation = this.gl.getAttribLocation(this.#program, 'aNDCPosition');
