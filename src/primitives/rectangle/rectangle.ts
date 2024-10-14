@@ -43,18 +43,11 @@ export class Rectangle implements BasePrimitive {
     this.initBuffer(gl);
   }
 
-  get projection() {
-    const x = this.position[ 0 ];
-    const y = this.position[ 1 ];
+  getTransformation(origin: [ number, number ] = [ 0, 0 ]) {
+    const x = this.position[ 0 ] + origin[ 0 ];
+    const y = this.position[ 1 ] + origin[ 1 ];
     const width = this.scale[ 0 ];
     const height = this.scale[ 1 ];
-
-    const projectionMatrix = new Float32Array([
-      1 / 640 * 2, 0,           0, 0,
-      0,           1 / 480 * 2, 0, 0,
-      0,           0,           1, 0,
-      -1,          -1,          0, 1
-    ]);
 
     /**
      * sx 0  0  0
@@ -62,16 +55,12 @@ export class Rectangle implements BasePrimitive {
      * 0  0  sz 0
      * tx ty tz 1
      */
-    const transformationView = new Float32Array([
+    return new Float32Array([
       width, 0, 0, 0,
       0, height, 0, 0,
       0, 0, 1, 0,
       x, y, 0, 1
     ]);
-
-    const finalNDCMatrix = mat4.create();
-    mat4.multiply(finalNDCMatrix, projectionMatrix, transformationView);
-    return finalNDCMatrix;
   }
 
   private initBuffer(gl: WebGLRenderingContext) {
@@ -92,8 +81,10 @@ export class Rectangle implements BasePrimitive {
   draw(origin: [number, number], camera: Camera): void {
     this.gl.useProgram(this.#program);
     this.gl.uniform4fv(this.#uniformLocation.color, this.color);
-window.mLog(this.projection);
-    this.gl.uniformMatrix4fv(this.#uniformLocation.projection, false, this.projection);
+
+    const finalNDCMatrix = mat4.create();
+    mat4.multiply(finalNDCMatrix, camera.view, this.getTransformation(origin));
+    this.gl.uniformMatrix4fv(this.#uniformLocation.projection, false, finalNDCMatrix);
 
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.#buffer);
     const positionAttributeLocation = this.gl.getAttribLocation(this.#program, 'aNDCPosition');
