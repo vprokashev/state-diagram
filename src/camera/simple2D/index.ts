@@ -1,1 +1,0 @@
-export { Simple2D } from './simple2D';

@@ -1,6 +1,14 @@
-import { CANVAS_NOT_FOND, SHADER_COMPILATION_ERROR, UNABLE_TO_CREATE_PROGRAM, UNABLE_TO_LINK_PROGRAM, UNIFORM_VARIABLE_MISMATCH, UNREACHABLE_STATE, WEB_GL_NOT_SUPPORTED } from '../errors';
+import {
+  CANVAS_NOT_FOND,
+  SHADER_COMPILATION_ERROR,
+  UNABLE_TO_CREATE_PROGRAM,
+  UNABLE_TO_LINK_PROGRAM,
+  UNIFORM_VARIABLE_MISMATCH,
+  UNREACHABLE_STATE,
+  WEB_GL_NOT_SUPPORTED
+} from './errors';
 
-export function initGL(): WebGLRenderingContext {
+export function initGL(): WebGL2RenderingContext {
   const canvas = <HTMLCanvasElement>document.querySelector('#canvas');
   if (!canvas) {
     throw new Error(CANVAS_NOT_FOND);
@@ -24,7 +32,7 @@ export function compileShader(gl: WebGLRenderingContext, source: string, type: G
   if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
     const log = gl.getShaderInfoLog(shader);
     gl.deleteShader(shader);
-    throw new Error(`${ SHADER_COMPILATION_ERROR }\n${ source }\n${ log }`);
+    throw new Error(`${SHADER_COMPILATION_ERROR}\n${source}\n${log}`);
   }
 
   return shader;
@@ -43,7 +51,7 @@ export function createProgram(gl: WebGLRenderingContext, vertexShader: WebGLShad
   if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
     const log = gl.getProgramInfoLog(program);
     gl.deleteProgram(program);
-    throw new Error(`${ UNABLE_TO_LINK_PROGRAM }\n${ log }`);
+    throw new Error(`${UNABLE_TO_LINK_PROGRAM}\n${log}`);
   }
 
   return program;
@@ -78,13 +86,13 @@ export function bindUniforms<UVariable extends Record<string, WebGLUniformLocati
     //throw new Error(`${ UNIFORM_VARIABLE_MISMATCH }\nIn the shader: ${ namesInShader.join(', ') }\nPassed: ${ glNames.join(', ') }`);
   }
 
-  const result:Record<string, WebGLUniformLocation> = {};
+  const result: Record<string, WebGLUniformLocation> = {};
   const dictionaryNames = Object.keys(dictionary);
   for (let index = 0; index < dictionaryNames.length; index++) {
-    const currentName = dictionaryNames[ index ];
-    const location = gl.getUniformLocation(program, dictionary[ currentName ]);
+    const currentName = dictionaryNames[index];
+    const location = gl.getUniformLocation(program, dictionary[currentName]);
     if (location) {
-      result[ currentName ] = location
+      result[currentName] = location
     }
   }
   return result as UVariable;
