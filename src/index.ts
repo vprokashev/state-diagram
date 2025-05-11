@@ -7,14 +7,18 @@ import { renderScene } from './renderScene';
 import { mat4 } from 'gl-matrix';
 
 function init(gl: WebGL2RenderingContext) {
-  const rectGeometry = new RectangleGeometry(100, 50);
+  const rectGeometry = new RectangleGeometry(300, 300);
   const rectRenderer = new RectangleRenderer(gl, rectGeometry);
 
   const rect1 = new RectangleNode(rectRenderer);
-  rect1.position[0] = -60;
+  rect1.position[0] = 0;
+  rect1.position[1] = 0;
+  rect1.updateLocalMatrix();
 
   const rect2 = new RectangleNode(rectRenderer);
-  rect2.position[0] = 60;
+  rect2.position[0] = 500;
+  rect2.position[1] = 500;
+  rect2.updateLocalMatrix();
 
   const group = new GroupNode();
   group.position[0] = 0;
@@ -27,19 +31,32 @@ function init(gl: WebGL2RenderingContext) {
   const root = new GroupNode();
   root.add(group);
 
+  const view = mat4.create();
+  const projection = mat4.create();
   const viewProjection = mat4.create();
   const canvas = gl.canvas as HTMLCanvasElement;
-  mat4.ortho(viewProjection, -200, 200, -200, 200, -1, 1);
 
-  let lastTime = performance.now();
+  mat4.identity(view);
+  mat4.ortho(projection, -1000, 1000, -1000, 1000, -1, 1);
 
-  function draw(time: number) {
-    const delta = (time - lastTime) / 1000;
-    lastTime = time;
+  function updateViewProjection() {
+    mat4.multiply(viewProjection, projection, view);
+  }
+  updateViewProjection();
 
-    group.rotation += delta;
-    group.updateLocalMatrix();
+  // ⌨ управление стрелками
+  window.addEventListener('keydown', (e) => {
+    const speed = 10;
+    switch (e.key) {
+      case 'ArrowUp': mat4.translate(view, view, [0, -speed, 0]); break;
+      case 'ArrowDown': mat4.translate(view, view, [0, speed, 0]); break;
+      case 'ArrowLeft': mat4.translate(view, view, [speed, 0, 0]); break;
+      case 'ArrowRight': mat4.translate(view, view, [-speed, 0, 0]); break;
+    }
+    updateViewProjection();
+  });
 
+  function draw() {
     gl.clear(gl.COLOR_BUFFER_BIT);
     renderScene(gl, root, viewProjection);
     requestAnimationFrame(draw);
@@ -48,14 +65,13 @@ function init(gl: WebGL2RenderingContext) {
   requestAnimationFrame(draw);
 }
 
-
 function main(): void {
   const gl = initGL();
   const canvas = document.getElementById('canvas');
   if (!canvas) {
     throw new Error("Canvas not found");
   }
-  init(gl, )
+  init(gl);
 }
 
-main()
+main();

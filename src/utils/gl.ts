@@ -13,7 +13,7 @@ export function initGL(): WebGL2RenderingContext {
   if (!canvas) {
     throw new Error(CANVAS_NOT_FOND);
   }
-  const gl = canvas.getContext('webgl2');
+  const gl = canvas.getContext('webgl2', { antialias: false });
   if (!gl) {
     throw new Error(WEB_GL_NOT_SUPPORTED);
   }

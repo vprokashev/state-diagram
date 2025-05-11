@@ -43,7 +43,7 @@ export class RectangleRenderer {
 
     gl.bindVertexArray(this.vao);
     gl.uniformMatrix4fv(this.uProjectionLoc, false, modelViewProjection);
-    gl.uniform4f(this.uColorLoc, 0.0, 0.0, 0.5, 1.0);
+    gl.uniform4f(this.uColorLoc, 0.5, 0.5, 0.5, 1.0);
 
     gl.drawArrays(gl.TRIANGLES, 0, 6);
     gl.bindVertexArray(null);
