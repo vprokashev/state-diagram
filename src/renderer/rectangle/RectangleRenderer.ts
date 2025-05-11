@@ -1,10 +1,11 @@
 import { RectangleGeometry } from '../../geometry/RectangleGeometry';
-import { mat4 } from 'gl-matrix';
+import {mat4, ReadonlyVec4} from 'gl-matrix';
 import { compileShader, createProgram } from '../../utils/gl';
 import vertexShaderSource from './rectangle.vert';
 import fragmentShaderSource from './rectangle.frag';
 
 export class RectangleRenderer {
+  public readonly geometry: RectangleGeometry;
   private readonly gl: WebGL2RenderingContext;
   private readonly program: WebGLProgram;
   private readonly positionBuffer: WebGLBuffer;
@@ -14,6 +15,7 @@ export class RectangleRenderer {
 
   constructor(gl: WebGL2RenderingContext, geometry: RectangleGeometry) {
     this.gl = gl;
+    this.geometry = geometry;
     const vertexShader = compileShader(this.gl, vertexShaderSource, this.gl.VERTEX_SHADER);
     const fragmentShader = compileShader(this.gl, fragmentShaderSource, this.gl.FRAGMENT_SHADER);
     this.program = createProgram(this.gl, vertexShader, fragmentShader);
@@ -37,13 +39,13 @@ export class RectangleRenderer {
     gl.bindVertexArray(null);
   }
 
-  public render(modelViewProjection: mat4): void {
+  public render(modelViewProjection: mat4, color: ReadonlyVec4): void {
     const gl = this.gl;
     gl.useProgram(this.program);
 
     gl.bindVertexArray(this.vao);
     gl.uniformMatrix4fv(this.uProjectionLoc, false, modelViewProjection);
-    gl.uniform4f(this.uColorLoc, 0.5, 0.5, 0.5, 1.0);
+    gl.uniform4fv(this.uColorLoc, color);
 
     gl.drawArrays(gl.TRIANGLES, 0, 6);
     gl.bindVertexArray(null);
